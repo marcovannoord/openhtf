@@ -126,20 +126,22 @@ class TestTestApi(unittest.TestCase):
     self.assertNotEqual(measurement_val, measurement.value)
 
   def test_infer_mime_type_from_file_name(self):
-    with tempfile.NamedTemporaryFile(suffix='.txt') as f:
-      f.write(b'Mock text contents.')
-      f.flush()
-      file_name = f.name
-      self.test_api.attach_from_file(file_name, 'attachment')
+    f = tempfile.NamedTemporaryFile(delete=False, suffix='.txt')
+    f.write(b'Mock text contents.')
+    f.flush()
+    file_name = f.name
+    self.test_api.attach_from_file(file_name, 'attachment')
+    f.close()
     attachment = self.test_api.get_attachment('attachment')
     self.assertEqual(attachment.mimetype, 'text/plain')
 
   def test_infer_mime_type_from_attachment_name(self):
-    with tempfile.NamedTemporaryFile() as f:
-      f.write(b'Mock text contents.')
-      f.flush()
-      file_name = f.name
-      self.test_api.attach_from_file(file_name, 'attachment.png')
+    f = tempfile.NamedTemporaryFile(delete=False)
+    f.write(b'Mock text contents.')
+    f.flush()
+    file_name = f.name
+    self.test_api.attach_from_file(file_name, 'attachment.png')
+    f.close()
     attachment = self.test_api.get_attachment('attachment.png')
     self.assertEqual(attachment.mimetype, 'image/png')
 

@@ -12,6 +12,7 @@ import oauth2client.client
 
 from openhtf.output import callbacks
 from openhtf.output.proto import test_runs_converter
+from openhtf.output.proto.test_runs_converter import MIMETYPE_MAP
 
 from openhtf.output.proto import guzzle_pb2
 
@@ -256,4 +257,3 @@ class UploadToMfgInspector(MfgInspector):
   def __call__(self, test_record_obj):  # pylint: disable=invalid-name
     upload_callback = self.upload()
     upload_callback(test_record_obj)
-

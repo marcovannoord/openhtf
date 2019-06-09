@@ -19,6 +19,7 @@ actually care for.
 """
 
 import io
+import os
 import sys
 import unittest
 
@@ -92,7 +93,7 @@ class TestOutput(test.TestCase):
     for parameter in test_run_proto.info_parameters:
       if parameter.name == attachment_name:
         self.assertEqual(
-            b'This is a text file attachment.\n',
+            bytes(u'This is a text file attachment.' + os.linesep, encoding='ascii'),
             parameter.value_binary,
         )
         break
@@ -157,7 +158,7 @@ class TestMfgEventOutput(test.TestCase):
       for attachment in mfg_event.attachment:
         if attachment.name == attachment_name:
           self.assertEqual(
-              b'This is a text file attachment.\n',
+              bytes(u'This is a text file attachment.' + os.linesep, encoding='ascii'),
               attachment.value_binary,
           )
           break
