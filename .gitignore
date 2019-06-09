@@ -31,8 +31,6 @@ env/
 venv/
 .env
 
-# built protos
-*_pb2.py
 
 # node stuff
 node_modules/
