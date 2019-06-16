@@ -177,13 +177,13 @@ class PyTestCommand(test):
 
 
 setup(
-    name='openhtf',
-    version='1.4.2',
-    description='OpenHTF, the open hardware testing framework.',
+    name='spintop',
+    version='0.5.1',
+    description='A fork of OpenHTF 1.4.2, the open hardware testing framework.',
     author='John Hawley',
     author_email='madsci@google.com',
-    maintainer='Joe Ethier',
-    maintainer_email='jethier@google.com',
+    maintainer='William Laroche',
+    maintainer_email='william.laroche@tackv.ca',
     packages=find_packages(exclude='examples'),
     package_data={'openhtf': ['output/proto/*.proto',
                               'output/web_gui/dist/*',
