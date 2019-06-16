@@ -116,11 +116,16 @@ class TestExecutor(threads.KillableThread):
     """Waits until death."""
     # Must use a timeout here in case this is called from the main thread.
     # Otherwise, the SIGINT abort logic in test_descriptor will not get called.
-    if sys.version_info >= (3, 2):
-      self.join(threading.TIMEOUT_MAX)
-    else:
-      # Seconds in a year.
-      self.join(31557600)
+
+    # This used to call join with threading.TIMEOUT_MAX. However, on raspbian
+    # this caused the join to return immediately. Changed to always use 1 year.
+
+    # Seconds in a year.
+    self.join(31557600)
+
+    # Sanity check to make sure we did not hit the one year timeout
+    if self.is_alive():
+        raise TestExecutionError('test_executor.wait() returned before thread died')
 
   def _thread_proc(self):
     """Handles one whole test from start to finish."""
