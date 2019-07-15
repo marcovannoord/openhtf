@@ -100,6 +100,8 @@ class MulticastListener(threading.Thread):
           # assigned to the interface on which to listen.
           struct.pack('!4sL', socket.inet_aton(self.address), interface_ip))
 
+
+
     if sys.platform == 'darwin':
       self._sock.setsockopt(socket.SOL_SOCKET,
                             socket.SO_REUSEPORT,
@@ -108,6 +110,8 @@ class MulticastListener(threading.Thread):
       self._sock.setsockopt(socket.SOL_SOCKET,
                             socket.SO_REUSEADDR,
                             1)  # Allow multiple listeners to bind.
+
+    print(self.address)
     self._sock.bind((self.address, self.port))
 
     while self._live:

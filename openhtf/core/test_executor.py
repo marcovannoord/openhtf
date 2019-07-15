@@ -29,6 +29,9 @@ from openhtf.util import threads
 
 _LOG = logging.getLogger(__name__)
 
+# seconds in a year
+TIMEOUT_MAX = 31557600
+
 conf.declare('cancel_timeout_s', default_value=2,
              description='Timeout (in seconds) when the test has been cancelled'
              'to wait for the running phase to exit.')
@@ -114,14 +117,18 @@ class TestExecutor(threads.KillableThread):
 
   def wait(self):
     """Waits until death."""
+    global TIMEOUT_MAX
     # Must use a timeout here in case this is called from the main thread.
     # Otherwise, the SIGINT abort logic in test_descriptor will not get called.
 
     # This used to call join with threading.TIMEOUT_MAX. However, on raspbian
     # this caused the join to return immediately. Changed to always use 1 year.
 
-    # Seconds in a year.
-    self.join(31557600)
+    try:
+        self.join(TIMEOUT_MAX)
+    except OverflowError:
+        TIMEOUT_MAX = TIMEOUT_MAX/2
+        self.wait()
 
     # Sanity check to make sure we did not hit the one year timeout
     if self.is_alive():

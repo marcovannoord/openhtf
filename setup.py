@@ -178,7 +178,7 @@ class PyTestCommand(test):
 
 setup(
     name='spintop',
-    version='0.5.1',
+    version='0.5.2',
     description='A fork of OpenHTF 1.4.2, the open hardware testing framework.',
     author='John Hawley',
     author_email='madsci@google.com',
