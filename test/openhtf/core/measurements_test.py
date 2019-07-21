@@ -1,5 +1,6 @@
 # coding: utf-8
 # Copyright 2016 Google Inc. All Rights Reserved.
+# Copyright 2019 Tack Verification Inc. All Rights Reserved.
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +25,7 @@ import collections
 from openhtf.core import measurements
 
 import mock
+import unittest
 
 from examples import all_the_things
 import openhtf as htf
@@ -33,6 +35,12 @@ from openhtf.util import test as htf_test
 # Fields that are considered 'volatile' for record comparison.
 _VOLATILE_FIELDS = {'start_time_millis', 'end_time_millis', 'timestamp_millis',
                     'lineno', 'codeinfo', 'code_info', 'descriptor_id'}
+
+try:
+  import pandas
+  PANDAS_IMPORT = True
+except ImportError:
+  PANDAS_IMPORT = False
 
 
 class BadValidatorError(Exception):
@@ -164,6 +172,8 @@ class TestMeasurement(htf_test.TestCase):
     with self.assertRaises(RuntimeError):
       self.test_to_dataframe(units=True)
 
+  @unittest.skipIf(not PANDAS_IMPORT,
+                     "Requires Pandas (optional dependency)")
   def test_to_dataframe(self, units=True):
     measurement = htf.Measurement('test_multidim')
     measurement.with_dimensions('ms', 'assembly',
@@ -184,7 +194,6 @@ class TestMeasurement(htf_test.TestCase):
 
     measurement.outcome = measurements.Outcome.PASS
 
-    df = measurement.to_dataframe()
     coordinates = (1, 'A', 2)
     query = '(ms == %s) & (assembly == "%s") & (my_zone == %s)' % (
         coordinates)
@@ -193,6 +202,8 @@ class TestMeasurement(htf_test.TestCase):
         measurement.measured_value[coordinates],
         df.query(query)[measure_column_name].values[0])
 
+  @unittest.skipIf(not PANDAS_IMPORT,
+                     "Requires Pandas (optional dependency)")
   def test_to_dataframe__no_units(self):
     self.test_to_dataframe(units=False)
 

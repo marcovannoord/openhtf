@@ -1,0 +1,11 @@
+default:
+  image: python:3.6
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+  - pip install -r test_reqs.txt
+  - pytest test/

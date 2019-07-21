@@ -30,6 +30,7 @@ import select
 import sys
 import threading
 import uuid
+import time
 
 from openhtf import PhaseOptions
 from openhtf import plugs
@@ -227,12 +228,17 @@ class UserInput(plugs.FrontendAwareBasePlug):
     Raises:
       PromptUnansweredError: Timed out waiting for the user to respond.
     """
+    start_time = time.time()
+
     with self._cond:
       if self._prompt:
-        if timeout_s is None:
-          self._cond.wait(3600 * 24 * 31)
-        else:
-          self._cond.wait(timeout_s)
+        # Waiting in short increments allows sys interrupts to be captured.
+        # This allows Ctrl-C to be used while waiting for a prompt.
+        while not self._cond.wait(0.1):
+          # If no timeout, we just wait continuously
+          if timeout_s is not None and time.time() - start_time > timeout_s:
+            break
+
       if self._response is None:
         raise PromptUnansweredError
       return self._response
