@@ -1,12 +1,20 @@
+
+
+# Spintop - OpenHTF
+A fork of OpenHTF 1.4.2 aiming to standardize test configuration and definition
+and extend the features of the original framework:
+
+- Standard plugs such as SSH and serial port (read & write)
+- Standard logging
+- Extended user inputs (images and pass/fail prompts)
+
+The features are selected and developped primarily based on use-cases 
+encountered by [Tack Verification Inc.](https://www.tackv.ca) during 
+development of real testbenches.
+
+# - Original OpenHTF README content -
+
 **DISCLAIMER:** This is not an official Google product.
-
-# OpenHTF
-The open-source hardware testing framework.
-
-[![Build Status](https://travis-ci.org/google/openhtf.svg?branch=master)](https://travis-ci.org/google/openhtf)
-[![Coverage Status](https://coveralls.io/repos/google/openhtf/badge.svg?branch=master&service=github)](https://coveralls.io/github/google/openhtf?branch=master)
-
-[Issue Stats](http://issuestats.com/github/google/openhtf)
 
 ## Overview
 OpenHTF is a Python library that provides a set of convenient abstractions
