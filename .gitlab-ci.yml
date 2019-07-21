@@ -1,10 +1,11 @@
+default:
+  image: python:3.6
+
 stages:
   - test
 
 test:
   stage: test
   script:
-  - apt-get update -qy
-  - apt-get install -y python-dev python-pip
   - pip install -r test_reqs.txt
   - pytest test/
