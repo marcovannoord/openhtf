@@ -1,3 +1,6 @@
+import openhtf as htf
+from openhtf.plugs import user_input
+
 from copy import copy
 
 class TestPlan(object):
@@ -13,3 +16,8 @@ class TestPlan(object):
     @property
     def phases(self):
         return copy(self._test_phases)
+
+    def execute(self, callbacks=[]):
+        test = htf.Test(*self.phases)
+        test.add_output_callbacks(*callbacks)
+        return test.execute(test_start=user_input.prompt_for_test_start())

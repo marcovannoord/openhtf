@@ -22,6 +22,7 @@ function that is used to send one-shot messages to a multicast socket.
 
 import logging
 import socket
+import ipaddress
 import struct
 import sys
 import threading
@@ -92,7 +93,9 @@ class MulticastListener(threading.Thread):
     # Passing in INADDR_ANY means the kernel will choose the default interface.
     # The localhost address is used to receive messages sent in "local_only"
     # mode and the default address is used to receive all other messages.
-    for interface_ip in (socket.INADDR_ANY, LOCALHOST_ADDRESS):
+    interface = socket.gethostbyname_ex(socket.gethostname())[2][0]
+    interface_num = int(ipaddress.IPv4Address(interface))
+    for interface_ip in (interface_num, LOCALHOST_ADDRESS):
       self._sock.setsockopt(
           socket.IPPROTO_IP,
           socket.IP_ADD_MEMBERSHIP,
@@ -101,18 +104,11 @@ class MulticastListener(threading.Thread):
           struct.pack('!4sL', socket.inet_aton(self.address), interface_ip))
 
 
-
-    if sys.platform == 'darwin':
-      self._sock.setsockopt(socket.SOL_SOCKET,
-                            socket.SO_REUSEPORT,
-                            1)  # Allow multiple listeners to bind.
+    if sys.platform.startswith('darwin') or sys.platform.startswith('win'):
+      # Binding on multicast addr not supported on Windows and Mac OS X
+      self._sock.bind(('', self.port))
     else:
-      self._sock.setsockopt(socket.SOL_SOCKET,
-                            socket.SO_REUSEADDR,
-                            1)  # Allow multiple listeners to bind.
-
-    print(self.address)
-    self._sock.bind((self.address, self.port))
+      self._sock.bind((self.address, self.port))
 
     while self._live:
       try:
