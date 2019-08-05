@@ -9,6 +9,7 @@ class TestPlan(object):
 
     def testcase(self, name, tests=[]):
         def _note_fn(fn):
+            fn.options.name = name # Use the testcase name
             self._test_phases.append(fn)
             return fn
         return _note_fn

@@ -41,6 +41,12 @@ LOCALHOST_ADDRESS = 0x7f000001  # 127.0.0.1
 MAX_MESSAGE_BYTES = 1024  # Maximum allowable message length in bytes.
 
 
+def platform_multicast_bind_addr(multicast_address):
+  if sys.platform.startswith('darwin') or sys.platform.startswith('win'):
+    return ''
+  else:
+    return multicast_address
+
 class MulticastListener(threading.Thread):
   """Agent that listens (and responds) to short messages on a multicast socket.
 
@@ -104,11 +110,7 @@ class MulticastListener(threading.Thread):
           struct.pack('!4sL', socket.inet_aton(self.address), interface_ip))
 
 
-    if sys.platform.startswith('darwin') or sys.platform.startswith('win'):
-      # Binding on multicast addr not supported on Windows and Mac OS X
-      self._sock.bind(('', self.port))
-    else:
-      self._sock.bind((self.address, self.port))
+    self._sock.bind((platform_multicast_bind_addr(self.address), self.port))
 
     while self._live:
       try:
@@ -160,7 +162,12 @@ def send(query,
         socket.IP_MULTICAST_IF,
         struct.pack('!L', LOCALHOST_ADDRESS))
   sock.settimeout(timeout_s)
-  sock.sendto(query.encode('utf-8'), (address, port))
+
+  bind_addr = address
+  if not platform_multicast_bind_addr(address):
+    bind_addr = '127.0.0.1'
+
+  sock.sendto(query.encode('utf-8'), (bind_addr, port))
 
   # Set up our thread-safe Queue for handling responses.
   recv_queue = queue.Queue()

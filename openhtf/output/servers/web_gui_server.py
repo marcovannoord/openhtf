@@ -39,7 +39,7 @@ STATIC_FILES = (
     r'img/.*',
     r'js/.*\.js',
     r'js/.*\.js\.map',
-    r'service-worker\.js',
+    r'service-worker\.js'
 )
 STATIC_FILE_ROUTES = '/(%s)' % '|'.join(STATIC_FILES)
 
