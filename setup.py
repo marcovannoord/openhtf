@@ -133,6 +133,7 @@ INSTALL_REQUIRES = [
     'protobuf>=3.6.0,<4.0',
     'PyYAML>=3.13,<4.0',
     'pyOpenSSL>=17.1.0,<18.0',
+    'SheetFu>=1.4.1',
     'sockjs-tornado>=1.0.3,<2.0',
     'tornado>=4.3,<5.0',
     'pyserial>=3.3.0,<4.0',
@@ -220,5 +221,6 @@ setup(
         'pandas>=0.22.0',
         'pytest>=2.9.2',
         'pytest-cov>=2.2.1',
+        'vcrpy>=2.1.0'
     ],
 )

@@ -9,10 +9,12 @@ class TestPlan(object):
 
     def testcase(self, name, tests=[]):
         def _note_fn(fn):
+            fn = ensure_htf_phase(fn)
             fn.options.name = name # Use the testcase name
             self._test_phases.append(fn)
             return fn
         return _note_fn
+    
 
     @property
     def phases(self):
@@ -22,3 +24,10 @@ class TestPlan(object):
         test = htf.Test(*self.phases)
         test.add_output_callbacks(*callbacks)
         return test.execute(test_start=user_input.prompt_for_test_start())
+
+
+def ensure_htf_phase(fn):
+    if not hasattr(fn, 'options'):
+        # Not a htf phase, decorate it so it becomes one.
+        fn = htf.PhaseOptions()(fn) 
+    return fn
