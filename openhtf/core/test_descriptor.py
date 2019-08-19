@@ -126,6 +126,7 @@ class Test(object):
 
   TEST_INSTANCES = weakref.WeakValueDictionary()
   HANDLED_SIGINT_ONCE = False
+  ARG_PARSER_FACTORY = create_arg_parser
 
   def __init__(self, *phases, **metadata):
     # Some sanity checks on special metadata keys we automatically fill in.
@@ -219,13 +220,16 @@ class Test(object):
     """Update test-wide configuration options. See TestOptions for docs."""
     # These internally ensure they are safe to call multiple times with no weird
     # side effects.
-    known_args, _ = create_arg_parser(add_help=True).parse_known_args()
-    if known_args.config_help:
-      sys.stdout.write(conf.help_text)
-      sys.exit(0)
+    known_args, _ = self.__class__.ARG_PARSER_FACTORY(add_help=True).parse_known_args()
+    self.known_args_hook(known_args)
     logs.configure_logging()
     for key, value in six.iteritems(kwargs):
       setattr(self._test_options, key, value)
+
+  def known_args_hook(self, known_args):
+    if known_args.config_help:
+      sys.stdout.write(conf.help_text)
+      sys.exit(0)
 
   @classmethod
   def handle_sig_int(cls, *_):

@@ -1,7 +1,9 @@
+from copy import copy
+
 import openhtf as htf
 from openhtf.plugs import user_input
 
-from copy import copy
+import spintop
 
 class TestPlan(object):
     def __init__(self):
@@ -14,14 +16,13 @@ class TestPlan(object):
             self._test_phases.append(fn)
             return fn
         return _note_fn
-    
 
     @property
     def phases(self):
         return copy(self._test_phases)
 
     def execute(self, callbacks=[]):
-        test = htf.Test(*self.phases)
+        test = spintop.Test(*self.phases, spintop_test_plan=self)
         test.add_output_callbacks(*callbacks)
         return test.execute(test_start=user_input.prompt_for_test_start())
 

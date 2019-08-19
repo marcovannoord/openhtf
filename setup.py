@@ -19,13 +19,12 @@ import os
 import platform
 import subprocess
 import sys
-
+from distutils.cmd import Command
 from distutils.command.build import build
 from distutils.command.clean import clean
-from distutils.cmd import Command
 from distutils.spawn import find_executable
-from setuptools import find_packages
-from setuptools import setup
+
+from setuptools import find_packages, setup
 from setuptools.command.test import test
 
 HERE = os.path.abspath(os.path.dirname(__file__))
