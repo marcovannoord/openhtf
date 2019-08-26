@@ -36,8 +36,6 @@ def create_netcomp_map_from_component(top_level_component, netlist):
         for net in component.nets:
             key = net_to_fully_qualified_name(prefix, net)
             netcomp = create_netcomp(key=key, net=net, component=component, netlist=netlist)
-            if key in netcomps:
-                raise CoverageAnalysisError('Duplicate net-component key: %s' % key)
             netcomps[key] = netcomp
     return netcomps
 
@@ -83,6 +81,7 @@ class CoverageAnalysis(object):
     def __init__(self, top_level_component):
         self._top_level = top_level_component
         self._netlist = create_netlist_from_component(top_level_component)
+        print(list(self._netlist.keys()))
         self._netcomp_map = create_netcomp_map_from_component(top_level_component, self._netlist)
         self._tests = {}
     
@@ -92,8 +91,8 @@ class CoverageAnalysis(object):
             
 
 class NetCompTestDescriptor(object):
-    def __init__(self, fnmatch, name, allow_links_to=[]):
-        self.source_match = fnmatch
+    def __init__(self, fnmatches, name, allow_links_to=[]):
+        self.source_matches = fnmatches
         self.name = name
         self.targets_match_allow = allow_links_to
     
@@ -107,7 +106,7 @@ class NetCompTestDescriptor(object):
         return set(target_netcomp_keys + source_netcomp_keys)
         
     def get_source_netcomp_keys(self, netcomp_map):
-        return list(filter_netcomp_map(netcomp_map, must_match=[self.source_match]))
+        return list(filter_netcomp_map(netcomp_map, must_match=self.source_matches))
     
     def get_target_netcomp_keys(self, netcomp_map, allowed_nets):
         return list(filter_netcomp_map(netcomp_map, must_match=self.targets_match_allow, allowed_nets=allowed_nets))

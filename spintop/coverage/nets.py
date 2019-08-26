@@ -1,14 +1,25 @@
-from collections import namedtuple
+from collections import namedtuple, Sequence
 from spintop.util import yaml_loader
 
 Net = namedtuple('Net', 'refs')
-    
+
+def flatten_string_list(array):
+    new_array = []
+    for item in array:
+        if isinstance(item, Sequence) and not isinstance(item, str):
+            new_array += item
+        else:
+            new_array.append(item)
+            
+    return new_array
 
 def load_nets(nets_array, nets=None):
     if nets is None:
         nets = {}
+        
     
-    for net_str in nets_array:
+    
+    for net_str in flatten_string_list(nets_array):
         refs = _get_net_refs(net_str)
 
         net = None

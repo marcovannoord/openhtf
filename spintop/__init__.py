@@ -11,8 +11,8 @@ from .coverage.analysis import (
 )
 
 from .coverage.components import (
-    define_component,
-    Component
+    Component,
+    load_component_file
 )
 
 from .coverage.nets import (

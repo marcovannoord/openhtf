@@ -9,8 +9,8 @@ def spintop_create_arg_parser(add_help=False):
           'Spintop - The extension to OpenHTF', parents=[create_arg_parser()],
           add_help=add_help)
     parser.add_argument(
-        '--spintop-whatever', action='store_true',
-        help='This shit is awesome')
+        '--coverage', action='store_true',
+        help='Print the list of covered components')
     return parser
 
 class Test(htf.Test):
@@ -24,5 +24,6 @@ class Test(htf.Test):
         """ Check for known args and perform possible effect instead of executing the test.
         Cancel execution using sys.exit(0)
         """
+        if known_args.coverage:
+            sys.exit(0)
         super(Test, self).known_args_hook(known_args)
-        

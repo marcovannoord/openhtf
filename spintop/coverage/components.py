@@ -4,10 +4,8 @@ automated test coverage calculation.
 """
 
 import collections
-from .nets import first_alias
-
-def define_component(name, description="", scopes=()):
-    return Component()
+from .nets import first_alias, flatten_string_list
+from spintop.util import yaml_loader
 
 QUALIFIED_NAME_SEPARATOR = '.'
 
@@ -16,9 +14,13 @@ def qualified_name_join(*strings):
 
 def net_to_fully_qualified_name(prefix, net):
     return qualified_name_join(prefix, first_alias(net))
+
+def load_component_file(filename):
+    content = yaml_loader.load_yml_file(filename)
+    return Component(**content)
     
 class Component(object):
-    def __init__(self, name, description="", components=[], nets=[], refdes=[]):
+    def __init__(self, name="", description="", components=[], nets=[], refdes=[], **kwargs):
         self._parent = None
         self.name = name
         self.description = description
@@ -31,18 +33,20 @@ class Component(object):
             component.attach_to(self)
             self.components[i] = component
         
-        self.nets = nets
+        self.nets = flatten_string_list(nets)
         self.refdes = refdes
-        
         self._nets_parsed = False
         
     def attach_to(self, parent):
         self._parent = parent
-        self.prefix = self.fully_qualified_prefix()
         
     def fully_qualified_prefix(self):
         if self._parent:
-            return qualified_name_join(self._parent.fully_qualified_prefix(), self.name)
+            prefix = self._parent.fully_qualified_prefix()
+            if prefix:
+                return qualified_name_join(prefix, self.name)
+            else:
+                return self.name
         else:
             return self.name
         
