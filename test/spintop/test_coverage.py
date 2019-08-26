@@ -24,6 +24,18 @@ def test_nets_array():
     assert 'C' in nets
     assert 'E' in nets and 'A' in nets['E'].refs
 
+def test_nested_nets_array():
+    nets = [
+        'A',
+        ['B', 'C']
+    ]
+
+    nets = load_nets(nets)
+    assert len(nets) == 3
+    for letter in 'ABC':
+        assert letter in nets
+    
+
 def test_jinja2_expansion():
     net_yml_str = """
 ---
@@ -122,12 +134,12 @@ def test_analysis_netcomp():
     top_level = top_two_child_components(first_nets=['A'], second_nets=['A'])
     
     analysis = CoverageAnalysis(top_level)
-    keys = analysis.add_test('X.Y.*', 'test_a', allow_links_to=[])
+    keys = analysis.add_test(['X.Y.*'], 'test_a', allow_links_to=[])
     
     assert 'X.Y.A' in keys
     assert 'X.Z.A' not in keys
     
-    keys = analysis.add_test('X.Y.*', 'test_b', allow_links_to=['*'])
+    keys = analysis.add_test(['X.Y.*'], 'test_b', allow_links_to=['*'])
     
     assert len(keys) == 2
     assert 'X.Y.A' in keys

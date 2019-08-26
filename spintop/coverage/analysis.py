@@ -81,7 +81,6 @@ class CoverageAnalysis(object):
     def __init__(self, top_level_component):
         self._top_level = top_level_component
         self._netlist = create_netlist_from_component(top_level_component)
-        print(list(self._netlist.keys()))
         self._netcomp_map = create_netcomp_map_from_component(top_level_component, self._netlist)
         self._tests = {}
     
