@@ -1,0 +1,3 @@
+[submodule "openhtf"]
+	path = openhtf
+	url = git@gitlab.com:tackv/openhtf.git
