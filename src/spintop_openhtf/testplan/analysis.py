@@ -4,8 +4,8 @@ import os
 from jsonschema.validators import validator_for
 from collections import Sequence
 
-from spintop.util import yaml_loader
-from spintop.util.compat import isstr
+from ..util import yaml_loader
+from ..util.compat import isstr
 
 from .base import TestPlanError
 

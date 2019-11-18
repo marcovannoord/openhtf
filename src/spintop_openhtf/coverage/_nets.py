@@ -1,5 +1,5 @@
 from collections import namedtuple, Sequence
-from spintop.util import yaml_loader
+from ..util import yaml_loader
 
 Net = namedtuple('Net', 'refs')
 

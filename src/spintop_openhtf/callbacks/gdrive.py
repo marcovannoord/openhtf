@@ -2,7 +2,7 @@ import logging
 import gspread
 import datetime
 
-from spintop.util.gdrive import FileNotFound, load_credentials_file, GoogleDrive, Worksheet, GoogleFolder
+from ..util.gdrive import FileNotFound, load_credentials_file, GoogleDrive, Worksheet, GoogleFolder
 from openhtf.core.test_record import Outcome
 from openhtf import conf
 

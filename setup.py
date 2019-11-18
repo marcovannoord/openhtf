@@ -8,7 +8,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 
 sys.path.insert(0, os.path.join(HERE, 'openhtf'))
 
-with open(os.path.join(HERE, 'spintop', 'VERSION')) as version_file:
+with open(os.path.join(HERE, 'src', 'spintop_openhtf', 'VERSION')) as version_file:
     VERSION = version_file.read().strip()
 
 if not os.path.exists(os.path.join('openhtf', 'openhtf')):

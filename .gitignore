@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.swp
+
+# Python dist/packaging
+.Python
+build/
+.cache/
+.coverage
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Coverage output
+htmlcov/
+
+# virtualenv
+env/
+venv/
+.env
+
+# built protos
+# *_pb2.py
+
+# node stuff
+node_modules/
+other_modules/
+
+# Sublime Text stuff
+*.sublime-project
+*.sublime-workspace
+
+# Tox temporary files
+.tox/

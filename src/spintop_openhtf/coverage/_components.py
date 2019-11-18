@@ -5,7 +5,7 @@ automated test coverage calculation.
 
 import collections
 from .nets import first_alias, flatten_string_list
-from spintop.util import yaml_loader
+from ..util import yaml_loader
 
 QUALIFIED_NAME_SEPARATOR = '.'
 

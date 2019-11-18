@@ -1,9 +1,15 @@
 from copy import copy
 
 import openhtf as htf
-from openhtf.plugs import user_input
 
-import spintop
+from openhtf.plugs import user_input
+from openhtf.output.servers import station_server
+
+from .. import (
+    Test,
+    # load_component_file,
+    # CoverageAnalysis
+)
 
 class TestPlanError(Exception): pass
 
@@ -32,21 +38,24 @@ class TestPlan(object):
     def phases(self):
         return copy(self._test_phases)
 
+    def run(self, callbacks=[]):
+        with station_server.StationServer() as server:
+            while True:
+                self.execute(callbacks + [server.publish_final_state])
+
     def execute(self, callbacks=[]):
-        test = spintop.Test(*self.phases, spintop_test_plan=self)
+        test = Test(*self.phases, spintop_test_plan=self)
         test.configure(failure_exceptions=(Exception,))
         test.add_output_callbacks(*callbacks)
         return test.execute(test_start=user_input.prompt_for_test_start())
     
     def define_top_level_component(self, _filename_or_component):
         if isinstance(_filename_or_component, str):
-            component = spintop.load_component_file(_filename_or_component)
+            component = load_component_file(_filename_or_component)
         else:
             component = _filename_or_component
         self._top_level_component = component
-        self.coverage = spintop.CoverageAnalysis(self._top_level_component)
-    
-
+        self.coverage = CoverageAnalysis(self._top_level_component)
 
 def ensure_htf_phase(fn):
     if not hasattr(fn, 'options'):
