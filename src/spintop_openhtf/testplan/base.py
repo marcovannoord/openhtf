@@ -3,7 +3,7 @@ from copy import copy
 import openhtf as htf
 
 from openhtf.plugs import user_input
-from openhtf.output.servers import station_server
+from ..callbacks import station_server
 
 from .. import (
     Test,

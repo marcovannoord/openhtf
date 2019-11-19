@@ -35,17 +35,9 @@ setup(
     package_dir={
         '': 'src',
         'openhtf': 'openhtf/openhtf',
-        'openhtf.output.web_gui': 'openhtf_web_gui'
     },
     packages=packages,
     package_data={
-        'openhtf_web_gui': [
-            './dist/*',
-            './dist/css/*',
-            './dist/js/*',
-            './dist/img/*',
-            './*'
-        ],
         'openhtf': [
             'output/proto/*.proto',
             'output/web_gui/dist/*',
