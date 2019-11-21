@@ -1,0 +1,15 @@
+@import 'vars';
+
+h1 {
+  color: $text-dark-grey;
+  font-size: $font-size-very-large;
+  margin: 0;
+}
+
+h2 {
+  color: $text-grey;
+  font-size: $font-size-small;
+  margin-left: 5px;
+  margin-bottom: 10px;
+  margin-top: auto;
+}

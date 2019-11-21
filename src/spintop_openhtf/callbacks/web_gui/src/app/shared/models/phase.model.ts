@@ -21,6 +21,7 @@ export class Phase {
   descriptorId: number;
   endTimeMillis: number|null;
   name: string;
+  doc: string;
   measurements: Measurement[];
   status: PhaseStatus;
   startTimeMillis: number|null;  // Should only be null if phase is waiting.

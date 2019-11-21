@@ -2,7 +2,7 @@ from copy import copy
 
 import openhtf as htf
 
-from openhtf.plugs import user_input
+from openhtf.plugs import user_input, BasePlug
 from ..callbacks import station_server
 
 from .. import (
@@ -39,15 +39,45 @@ class TestPlan(object):
         return copy(self._test_phases)
 
     def run(self, callbacks=[]):
-        with station_server.StationServer() as server:
+        self.file_provider = station_server.TemporaryFileProvider()
+        with station_server.StationServer(self.file_provider) as server:
             while True:
-                self.execute(callbacks + [server.publish_final_state])
+                try:
+                    self.execute(callbacks + [server.publish_final_state])
+                except KeyboardInterrupt:
+                    break
 
     def execute(self, callbacks=[]):
+        
         test = Test(*self.phases, spintop_test_plan=self)
         test.configure(failure_exceptions=(Exception,))
         test.add_output_callbacks(*callbacks)
-        return test.execute(test_start=user_input.prompt_for_test_start())
+        
+        return test.execute(test_start=self._test_start(file_provider=self.file_provider))
+    
+    def create_plug(self):
+        class _SelfReferingPlug(BasePlug):
+            def __new__(cls):
+                return self
+        
+        return _SelfReferingPlug
+    
+    def spintop_plug(self, fn):
+        return htf.plugs.plug(spintop=self.create_plug())(fn)
+    
+    def _test_start(self, message='Enter a DUT ID in order to start the test.',
+            validator=lambda sn: sn, **state):
+        
+        @htf.plugs.plug(prompts=user_input.UserInput)
+        def trigger_phase(test, prompts):
+            """Test start trigger that prompts the user for a DUT ID."""
+            test.state.update(state)
+                
+            dut_id = prompts.prompt(
+                message, text_input=True)
+            test.test_record.dut_id = validator(dut_id)
+        
+        return trigger_phase
     
     def define_top_level_component(self, _filename_or_component):
         if isinstance(_filename_or_component, str):

@@ -1,6 +1,7 @@
 <div class="htf-layout-header" [class.header-with-measurements]="showMeasurements">
   <span class="u-clamp-text">
     <span class="phase-name">{{ phase.name }}</span>
+    <span class="phase-name">{{ phase.doc }}</span>
     <span *ngIf="phase.status !== PhaseStatus.waiting">
       &nbsp;{{ phase | elapsedTime:'(%s)' }}
     </span>

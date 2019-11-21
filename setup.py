@@ -1,28 +1,32 @@
 import os
 import sys
 from glob import glob
-
 from setuptools import setup, find_packages
+from setuptools.command.install import install as install_orig
+from setuptools.command.develop import develop as develop_orig
+
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
-sys.path.insert(0, os.path.join(HERE, 'openhtf'))
+sys.path.append(os.path.join(HERE, 'openhtf'))
 
 with open(os.path.join(HERE, 'src', 'spintop_openhtf', 'VERSION')) as version_file:
     VERSION = version_file.read().strip()
 
-if not os.path.exists(os.path.join('openhtf', 'openhtf')):
-    raise Exception('Please checkout the openhtf submodule before install.')
+# if not os.path.exists(os.path.join('openhtf', 'openhtf')):
+#     raise Exception('Please checkout the openhtf submodule before install.')
 
-compiled_proto_files = glob('openhtf/openhtf/output/proto/*_pb2.py')
+compiled_proto_files = glob('src/openhtf/output/proto/*_pb2.py')
 if not compiled_proto_files:
     raise Exception('Protobuf files in openhtf where not compiled. Must be done before hand.')
 
 # Find packages under openhtf(git) / openhtf
 # Add the package itself
 
-openhtf_packages = ['openhtf'] + ['openhtf.' + pack for pack in find_packages(where='openhtf/openhtf')]
-packages =  openhtf_packages + find_packages('src')
+# openhtf_packages = ['openhtf'] + ['openhtf.' + pack for pack in find_packages(where='openhtf/openhtf')]
+packages =  find_packages('src')
+
+print(packages)
 
 setup(
     name='spintop-openhtf',
@@ -34,7 +38,6 @@ setup(
     maintainer_email='william.laroche@tackv.ca',
     package_dir={
         '': 'src',
-        'openhtf': 'openhtf/openhtf',
     },
     packages=packages,
     package_data={
@@ -46,7 +49,7 @@ setup(
             'output/web_gui/dist/img/*',
             'output/web_gui/*'
         ],
-        'spintop': ['VERSION']
+        'spintop_openhtf': ['VERSION']
     },
     install_requires=[
         'oauth2client>=4.1.0',
@@ -58,13 +61,13 @@ setup(
         'mutablerecords>=0.4.1,<2.0',
         'oauth2client>=4.1.3',
         'protobuf>=3.6.0,<4.0',
-        'PyYAML>=3.13,<4.0',
+        'PyYAML>=5.0',
         'pyOpenSSL>=17.1.0,<18.0',
         'SheetFu>=1.4.1',
         'sockjs-tornado>=1.0.3,<2.0',
         'tornado>=4.3,<5.0',
         'pyserial>=3.3.0,<4.0',
-        'jsonschema>=3.0.2'
+        'jsonschema>=3.0.2',
     ],
     extras_require={
     },
