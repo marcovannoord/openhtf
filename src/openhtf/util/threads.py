@@ -21,6 +21,7 @@ import functools
 import logging
 import sys
 import threading
+import time
 
 import six
 try:
@@ -43,6 +44,14 @@ def safe_lock_release_context(rlock):
   # termination issues.
   return _placeholder_release_py3()
 
+def join_timeout_increments(thread, timeout=None, increment=0.5):
+  start = time.time()
+  
+  while thread.is_alive():
+    if timeout and time.time() - start > timeout:
+      break
+    thread.join(increment)
+  
 
 @contextlib.contextmanager
 def _placeholder_release_py3():

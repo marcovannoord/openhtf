@@ -201,19 +201,38 @@ class CodeInfo(mutablerecords.HashableRecord(
   """Information regarding the running tester code."""
 
   @classmethod
-  def for_module_from_stack(cls, levels_up=1):
+  def for_module_from_stack(cls, levels_up=1, after_file=None, with_source=False):
     # levels_up is how many frames up to go:
     #  0: This function (useless).
     #  1: The function calling this (likely).
     #  2+: The function calling 'you' (likely in the framework).
-    frame, filename = inspect.stack(context=0)[levels_up][:2]
+    stack = inspect.stack(context=0)
+    if after_file:
+      found_file = False
+      for stackframe in stack:
+        frame, filename = stackframe[:2]
+        if filename == after_file:
+          found_file = True
+        elif found_file:
+          # we skipped the file. All good !
+          break
+        
+    else:
+      frame, filename = stack[levels_up][:2]
+    
     module = inspect.getmodule(frame)
-    source = _get_source_safely(frame)
+    if with_source:
+      source = _get_source_safely(frame)
+    else:
+      source = ''
     return cls(os.path.basename(filename), inspect.getdoc(module), source)
 
   @classmethod
-  def for_function(cls, func):
-    source = _get_source_safely(func)
+  def for_function(cls, func, with_source=False):
+    if with_source:
+      source = _get_source_safely(func)
+    else:
+      source = ''
     return cls(func.__name__, inspect.getdoc(func), source)
 
   @classmethod

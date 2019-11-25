@@ -180,27 +180,27 @@ class PhaseGroup(mutablerecords.Record(
         teardown=flatten_phases_and_groups(self.teardown),
         name=self.name)
 
-  def load_code_info(self):
+  def load_code_info(self, with_source=False):
     """Load coded info for all contained phases."""
     return PhaseGroup(
-        setup=load_code_info(self.setup),
-        main=load_code_info(self.main),
-        teardown=load_code_info(self.teardown),
+        setup=load_code_info(self.setup, with_source=with_source),
+        main=load_code_info(self.main, with_source=with_source),
+        teardown=load_code_info(self.teardown, with_source=with_source),
         name=self.name)
 
 
-def load_code_info(phases_or_groups):
+def load_code_info(phases_or_groups, with_source=False):
   """Recursively load code info for a PhaseGroup or list of phases or groups."""
   if isinstance(phases_or_groups, PhaseGroup):
-    return phases_or_groups.load_code_info()
+    return phases_or_groups.load_code_info(with_source=with_source)
   ret = []
   for phase in phases_or_groups:
     if isinstance(phase, PhaseGroup):
-      ret.append(phase.load_code_info())
+      ret.append(phase.load_code_info(with_source=with_source))
     else:
       ret.append(
           mutablerecords.CopyRecord(
-              phase, code_info=test_record.CodeInfo.for_function(phase.func)))
+              phase, code_info=test_record.CodeInfo.for_function(phase.func, with_source=with_source)))
   return ret
 
 

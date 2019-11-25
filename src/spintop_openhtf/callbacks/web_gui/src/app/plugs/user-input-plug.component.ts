@@ -12,6 +12,8 @@ import { ConfigService } from '../core/config.service';
 import { FlashMessageService } from '../core/flash-message.service';
 import { washIn } from '../shared/animations';
 
+import { MarkdownService } from 'ngx-markdown';
+
 import { BasePlug } from './base-plug';
 
 const plugName = 'openhtf.plugs.user_input.UserInput';
@@ -36,7 +38,8 @@ export class UserInputPlugComponent extends BasePlug {
 
   constructor(
       config: ConfigService, http: Http, flashMessage: FlashMessageService,
-      private ref: ElementRef, private sanitizer: DomSanitizer) {
+      private ref: ElementRef, private sanitizer: DomSanitizer, 
+      private markdownService: MarkdownService) {
     super(plugName, config, http, flashMessage);
   }
 
@@ -49,9 +52,9 @@ export class UserInputPlugComponent extends BasePlug {
     // Run this when a new prompt is set.
     if (this.lastPromptId !== state.id) {
       this.lastPromptId = state.id;
-      const safeHtml =
-          this.sanitizer.sanitize(SecurityContext.HTML, state.message)
-              .replace(/&#10;/g, '<br>');  // Convert newlines.
+      const message = this.markdownService.compile(state.message)
+      const safeHtml = this.sanitizer.sanitize(SecurityContext.HTML, message)
+              // .replace(/&#10;/g, '<br>');  // Convert newlines.
       this.lastPromptHtml = this.sanitizer.bypassSecurityTrustHtml(safeHtml);
       this.focusSelf();
       if (state.default) {

@@ -44,7 +44,7 @@ from openhtf.util import argv
 from openhtf.util import threads
 from openhtf.util import timeouts
 
-DEFAULT_PHASE_TIMEOUT_S = 3 * 60
+DEFAULT_PHASE_TIMEOUT_S = 365 * 24 * 60 * 60
 
 ARG_PARSER = argv.ModuleParser()
 ARG_PARSER.add_argument(
@@ -172,9 +172,9 @@ class PhaseExecutorThread(threads.KillableThread):
   def join_or_die(self):
     """Wait for thread to finish, returning a PhaseExecutionOutcome instance."""
     if self._phase_desc.options.timeout_s is not None:
-      self.join(self._phase_desc.options.timeout_s)
+      threads.join_timeout_increments(self, self._phase_desc.options.timeout_s)
     else:
-      self.join(DEFAULT_PHASE_TIMEOUT_S)
+      threads.join_timeout_increments(self, DEFAULT_PHASE_TIMEOUT_S)
 
     # We got a return value or an exception and handled it.
     if isinstance(self._phase_execution_outcome, PhaseExecutionOutcome):

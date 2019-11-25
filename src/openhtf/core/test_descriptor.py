@@ -51,10 +51,18 @@ _LOG = logging.getLogger(__name__)
 conf.declare('capture_source', description=textwrap.dedent(
     '''Whether to capture the source of phases and the test module.  This
     defaults to False since this potentially reads many files and makes large
-    string copies.
+    string copies. If True, will capture docstring also.
 
     Set to 'true' if you want to capture your test's source.'''),
              default_value=False)
+
+conf.declare('capture_docstring', description=textwrap.dedent(
+    '''Whether to capture the docstring of phases and the test module. 
+    If True, will capture docstring.
+
+    Set to 'true' if you want to capture your test's docstring.'''),
+             default_value=False)
+
 # TODO(arsharma): Deprecate this configuration after removing the old teardown
 # specification.
 conf.declare('teardown_timeout_s', default_value=30, description=
@@ -62,6 +70,11 @@ conf.declare('teardown_timeout_s', default_value=30, description=
              'this option is deprecated and only applies to the deprecated '
              'Test level teardown function.')
 
+def should_create_code_info():
+  return conf.capture_docstring or conf.capture_source
+
+def should_capture_source():
+  return conf.capture_source
 
 class UnrecognizedTestUidError(Exception):
   """Raised when information is requested about an unknown Test UID."""
@@ -128,7 +141,7 @@ class Test(object):
   HANDLED_SIGINT_ONCE = False
   ARG_PARSER_FACTORY = create_arg_parser
 
-  def __init__(self, *phases, **metadata):
+  def __init__(self, *phases, _code_info_after_file=None, **metadata):
     # Some sanity checks on special metadata keys we automatically fill in.
     if 'config' in metadata:
       raise KeyError(
@@ -142,13 +155,18 @@ class Test(object):
     self._test_desc = TestDescriptor(
         phases, test_record.CodeInfo.uncaptured(), metadata)
 
-    if conf.capture_source:
+    if should_create_code_info():
       # First, we copy the phases with the real CodeInfo for them.
-      group = self._test_desc.phase_group.load_code_info()
+      group = self._test_desc.phase_group.load_code_info(with_source=should_capture_source())
 
       # Then we replace the TestDescriptor with one that stores the test
       # module's CodeInfo as well as our newly copied phases.
-      code_info = test_record.CodeInfo.for_module_from_stack(levels_up=2)
+      if _code_info_after_file is None:
+        _code_info_after_file = __file__
+        
+      # Extract the module level doc from the first file in the stack after _code_info_after_file
+      # Unless specified, this is file calling this constructor.
+      code_info = test_record.CodeInfo.for_module_from_stack(after_file=_code_info_after_file, with_source=should_capture_source())
       self._test_desc = self._test_desc._replace(
           code_info=code_info, phase_group=group)
 
@@ -304,8 +322,8 @@ class Test(object):
       else:
         trigger = test_start
 
-      if conf.capture_source:
-        trigger.code_info = test_record.CodeInfo.for_function(trigger.func)
+      if should_create_code_info():
+        trigger.code_info = test_record.CodeInfo.for_function(trigger.func, with_source=should_capture_source())
 
       test_desc = self._get_running_test_descriptor()
       self._executor = test_executor.TestExecutor(

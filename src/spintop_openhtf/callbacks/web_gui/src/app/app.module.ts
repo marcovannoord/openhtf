@@ -11,6 +11,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpModule } from '@angular/http';
 import { FormsModule } from '@angular/forms';
+import { MarkdownModule } from 'ngx-markdown';
 
 import { AppComponent } from './app.component';
 
@@ -29,6 +30,7 @@ import { removeNgStyles, createNewHosts } from '@angularclass/hmr';
     HttpClientModule,
     HttpModule,
     FormsModule,
+    MarkdownModule.forRoot(),
 
     // Our modules
     CoreModule,
