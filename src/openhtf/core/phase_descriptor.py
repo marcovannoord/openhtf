@@ -61,6 +61,12 @@ PhaseResult = enum.Enum('PhaseResult', [   # pylint: disable=invalid-name
     'STOP'
 ])
 
+PhaseType = enum.Enum('PhaseType', [
+  'MAIN',
+  'SETUP',
+  'TEARDOWN'
+])
+
 
 class PhaseOptions(mutablerecords.Record('PhaseOptions', [], {
     'name': None, 'timeout_s': None, 'run_if': None, 'requires_state': None,
@@ -119,7 +125,8 @@ TestPhase = PhaseOptions
 class PhaseDescriptor(mutablerecords.Record(
     'PhaseDescriptor', ['func'],
     {'options': PhaseOptions, 'plugs': list, 'measurements': list,
-     'extra_kwargs': dict, 'code_info': test_record.CodeInfo.uncaptured()})):
+     'extra_kwargs': dict, 'code_info': test_record.CodeInfo.uncaptured(),
+     'run_options': dict})):
   """Phase function and related information.
 
   Attributes:
@@ -129,6 +136,7 @@ class PhaseDescriptor(mutablerecords.Record(
     measurements: List of Measurement objects.
     extra_kwargs: Keyword arguments that will be passed to the function.
     code_info: Info about the source code of func.
+    type: PhaseType instance.
   """
 
   @classmethod
@@ -159,6 +167,14 @@ class PhaseDescriptor(mutablerecords.Record(
       retval = cls(func)
     retval.options.update(**options)
     return retval
+  
+  def as_type(self, phase_type):
+    self.run_options['type'] = phase_type
+    return self
+  
+  def as_depth(self, depth):
+    self.run_options['depth'] = depth
+    return self
 
   def _asdict(self):
     asdict = {

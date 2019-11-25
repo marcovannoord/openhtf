@@ -24,14 +24,16 @@
       <div class="user-input-error-text u-push-top-third" *ngIf="error">
         {{ error }}
       </div>
-
-      <div class="u-text-align-right">
-        <button
-          type="button"
-          class="htf-rounded-button-grey u-push-top"
-          (click)="sendResponse(response_field)">
-          {{ hasTextInput() ? 'Submit' : 'Okay' }}
-        </button>
+      
+      <div class="user-input-button-container">
+        <div *ngFor="let option of options" class="u-text-align-right">
+          <button
+            type="button"
+            class="htf-rounded-button-grey user-input-button-{{option.level}}"
+            (click)="sendResponse(response_field, option.key)">
+            {{ option.name }}
+          </button>
+        </div>
       </div>
 
     </div>

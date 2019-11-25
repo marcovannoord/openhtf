@@ -23,7 +23,8 @@ export declare interface UserInputPlugState {
   error?: string;    // Used by ui_plugs.advanced_user_input.AdvancedUserInput.
   id: string;
   message: string;
-  'text-input': string;
+  prompt_type: string;
+  options: Array<object>;
 }
 
 @Component({
@@ -47,6 +48,10 @@ export class UserInputPlugComponent extends BasePlug {
     return this.getPlugState().error;
   }
 
+  get options() {
+    return this.getPlugState().options;
+  }
+
   get prompt() {
     const state = this.getPlugState();
     // Run this when a new prompt is set.
@@ -65,10 +70,10 @@ export class UserInputPlugComponent extends BasePlug {
   }
 
   hasTextInput() {
-    return this.getPlugState()['text-input'];
+    return this.getPlugState()['prompt_type'] === 'TEXT_INPUT';
   }
 
-  sendResponse(input: HTMLInputElement) {
+  sendResponse(input: HTMLInputElement, optionKey: string) {
     const promptId = this.getPlugState().id;
     let response: string;
     if (this.hasTextInput()) {
@@ -77,7 +82,12 @@ export class UserInputPlugComponent extends BasePlug {
     } else {
       response = '';
     }
-    this.respond('respond', [promptId, response]);
+    const response_data = {
+      content: response,
+      option: optionKey
+    }
+
+    this.respond('respond', [promptId, response_data]);
   }
 
   protected getPlugState() {

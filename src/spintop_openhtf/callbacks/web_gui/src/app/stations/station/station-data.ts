@@ -75,6 +75,7 @@ export interface RawPhase {
   descriptor_id: number;
   end_time_millis?: number;
   measurements: {[name: string]: RawMeasurement};
+  run_options: object;
   name: string;
   doc?: string;
   result?: {};  // Not present on running phase state.
@@ -97,6 +98,7 @@ export interface RawPhaseDescriptor {
   id: number;
   name: string;
   doc: string;
+  run_options: object;
   measurements: RawMeasurement[];
 }
 
@@ -159,7 +161,6 @@ export function makeTest(
 
 function makePhase(phase: RawPhase, running: boolean) {
   // Legacy support: phase.attachments in a test record may be undefined.
-  console.log(phase);
   let attachments = [];
   if (phase.attachments) {
     attachments = Object.keys(phase.attachments).map(name => {
@@ -217,6 +218,7 @@ function makePhase(phase: RawPhase, running: boolean) {
     descriptorId: phase.descriptor_id,
     endTimeMillis: phase.end_time_millis || null,
     name: phase.name,
+    runOptions: phase.run_options,
     doc: phase.codeinfo['docstring'],
     startTimeMillis: phase.start_time_millis,
     status,
@@ -225,13 +227,13 @@ function makePhase(phase: RawPhase, running: boolean) {
 }
 
 export function makePhaseFromDescriptor(descriptor: RawPhaseDescriptor) {
-  console.log(descriptor);
   return new Phase({
     attachments: [],
     descriptorId: descriptor.id,
     endTimeMillis: null,
     name: descriptor.name,
     doc: descriptor.doc,
+    runOptions: descriptor.run_options,
     startTimeMillis: null,
     status: PhaseStatus.waiting,
     measurements: descriptor.measurements.map(measurement => {

@@ -71,6 +71,11 @@ class PhaseGroup(mutablerecords.Record(
       teardown = ()
     elif isinstance(teardown, PhaseGroup):
       teardown = (teardown,)
+      
+    setup = tuple(p.as_type(phase_descriptor.PhaseType.SETUP) for p in setup)
+    main = tuple(p.as_type(phase_descriptor.PhaseType.MAIN) for p in main)
+    teardown = tuple(p.as_type(phase_descriptor.PhaseType.TEARDOWN) for p in teardown)
+      
     super(PhaseGroup, self).__init__(
         setup=tuple(setup), main=tuple(main), teardown=tuple(teardown),
         name=name)
@@ -155,6 +160,14 @@ class PhaseGroup(mutablerecords.Record(
     """Substitute only known plugs for placeholders for each contained phase."""
     return self.transform(functools.partial(optionally_with_plugs, **subplugs))
 
+  def as_type(self, type):
+    """Same interface as PhaseDescriptors"""
+    return self
+  
+  def as_depth(self, depth):
+    """Same interface as PhaseDescriptors"""
+    return self
+
   def _iterate(self, phases):
     for phase in phases:
       if isinstance(phase, PhaseGroup):
@@ -179,6 +192,9 @@ class PhaseGroup(mutablerecords.Record(
         main=flatten_phases_and_groups(self.main),
         teardown=flatten_phases_and_groups(self.teardown),
         name=self.name)
+
+  def build_tree(self):
+    return build_phase_group_tree(self)
 
   def load_code_info(self, with_source=False):
     """Load coded info for all contained phases."""
@@ -209,14 +225,40 @@ def flatten_phases_and_groups(phases_or_groups):
   if isinstance(phases_or_groups, PhaseGroup):
     phases_or_groups = [phases_or_groups]
   ret = []
-  for phase in phases_or_groups:
-    if isinstance(phase, PhaseGroup):
-      ret.append(phase.flatten())
-    elif isinstance(phase, collections.Iterable):
-      ret.extend(flatten_phases_and_groups(phase))
-    else:
-      ret.append(phase_descriptor.PhaseDescriptor.wrap_or_copy(phase))
+  
+  _flatten_functions(phases_or_groups, 
+    on_phase_group = lambda phase: ret.append(phase.flatten()),
+    on_iterable = lambda phase: ret.extend(flatten_phases_and_groups(phase)),
+    on_else = lambda phase: ret.append(phase_descriptor.PhaseDescriptor.wrap_or_copy(phase))
+  )
+  
   return ret
+
+def build_phase_group_tree(phases_or_groups, _depth=0):
+  if isinstance(phases_or_groups, PhaseGroup):
+    phases_or_groups = [phases_or_groups]
+    
+  tree = []
+  
+  _flatten_functions(phases_or_groups, 
+    on_phase_group = lambda phase: tree.append(build_phase_group_tree(phase.setup + phase.main + phase.teardown, _depth=_depth+1)),
+    on_iterable = lambda phase: tree.append(build_phase_group_tree(phase, _depth=_depth+1)),
+    on_else = lambda phase: tree.append(phase_descriptor.PhaseDescriptor.wrap_or_copy(phase).as_depth(_depth))
+  )
+  
+  return tree
+  
+
+def _flatten_functions(list_to_flatten, on_phase_group, on_iterable, on_else):
+  for item in list_to_flatten:
+    if isinstance(item, PhaseGroup):
+      on_phase_group(item)
+    elif isinstance(item, collections.Iterable):
+      on_iterable(item)
+    else:
+      on_else(item)
+      
+  
 
 
 def optionally_with_args(phase, **kwargs):

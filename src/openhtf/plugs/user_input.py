@@ -31,6 +31,7 @@ import sys
 import threading
 import uuid
 import time
+import enum
 
 from openhtf import PhaseOptions
 from openhtf import plugs
@@ -44,6 +45,97 @@ _LOG = logging.getLogger(__name__)
 
 PROMPT = '--> '
 
+PromptType = enum.Enum('PromptType', [
+  'OKAY',
+  'TEXT_INPUT',
+  'OKAY_CANCEL',
+  'PASS_FAIL',
+  'PASS_FAIL_RETRY'
+])
+
+class InvalidOption(Exception):
+  def __init__(self, option):
+    self.option = option
+    super(InvalidOption, self).__init__('Option %s is not valid' % self.option)
+
+class SecondaryOptionOccured(Exception):
+  pass
+
+class CancelOption(SecondaryOptionOccured):
+  pass
+
+class FailOption(SecondaryOptionOccured):
+  pass
+
+class RetryOption(SecondaryOptionOccured):
+  pass
+
+class PromptOption(object):
+  def __init__(self, key, error=None, name=None, error_level=False, warning_level=False, success_level=False):
+    self.key = key
+    self.error = error
+    
+    if (error and not warning_level) or error_level:
+      self.level = 'error'
+    elif warning_level:
+      self.level = 'warning'
+    elif success_level:
+      self.level = 'success'
+    else:
+      self.level = 'info'
+      
+    if name is None:
+      name = key
+    self.name = name
+    
+  def as_dict(self):
+    return {'key': self.key, 'name': self.name, 'level': self.level}
+    
+  def raise_if_error(self):
+    if self.error:
+      raise self.error
+  
+class PromptResponse(object):
+  def __init__(self, response, prompt_type):
+    self.content = str(response)
+    self.option = None
+    
+    if isinstance(response, collections.Mapping):
+      self.content = response.get('content', '')
+      self.option = response.get('option', None)
+    elif prompt_type != PromptType.TEXT_INPUT:
+      self.option = response
+    
+    if not self.option:
+      self.option = None
+    
+    if self.option not in OPTIONS:
+      raise InvalidOption(self.option)
+    
+    self.option = OPTIONS[self.option]
+    
+  def return_value(self):
+    self.option.raise_if_error()
+    return self.content
+      
+
+OKAY = PromptOption('OKAY')
+
+OPTIONS = {
+  None: OKAY,
+  'OKAY': OKAY,
+  'CANCEL': PromptOption('CANCEL', CancelOption, warning_level=True),
+  'PASS': PromptOption('PASS', success_level=True),
+  'FAIL': PromptOption('FAIL', FailOption),
+  'RETRY': PromptOption('RETRY', RetryOption, warning_level=True)
+}
+
+PROMPT_TO_OPTIONS = {
+  PromptType.OKAY: [OPTIONS['OKAY']],
+  PromptType.TEXT_INPUT: [OPTIONS['OKAY']],
+  PromptType.OKAY_CANCEL: [OPTIONS['OKAY'], OPTIONS['CANCEL']],
+  PromptType.PASS_FAIL: [OPTIONS['PASS'], OPTIONS['FAIL']]
+}
 
 class PromptInputError(Exception):
   """Raised in the event that a prompt returns without setting the response."""
@@ -57,7 +149,8 @@ class PromptUnansweredError(Exception):
   """Raised when a prompt times out or otherwise comes back unanswered."""
 
 
-Prompt = collections.namedtuple('Prompt', 'id message text_input')
+Prompt = collections.namedtuple('Prompt', 'id message prompt_type')
+
 
 
 class ConsolePrompt(threading.Thread):
@@ -128,6 +221,18 @@ class ConsolePrompt(threading.Thread):
           return
 
 
+def prompt_type_console_message(message, options=[]):
+  if len(options) <= 1:
+    return message
+  else:
+    return message + ". Select one of the following option: " + " or ".join(opt.key for opt in options)
+  
+def prompt_options(prompt_type):
+  if prompt_type in PROMPT_TO_OPTIONS:
+    return PROMPT_TO_OPTIONS[prompt_type]
+  else:
+    raise RuntimeError('PromptType %s does not exists.' % prompt_type)
+ 
 class UserInput(plugs.FrontendAwareBasePlug):
   """Get user input from inside test phases.
 
@@ -151,7 +256,8 @@ class UserInput(plugs.FrontendAwareBasePlug):
         return
       return {'id': self._prompt.id,
               'message': self._prompt.message,
-              'text-input': self._prompt.text_input}
+              'prompt_type': self._prompt.prompt_type,
+              'options': [opt.as_dict() for opt in self._options]}
 
   def tearDown(self):
     self.remove_prompt()
@@ -165,12 +271,17 @@ class UserInput(plugs.FrontendAwareBasePlug):
         self._console_prompt = None
       self.notify_update()
 
-  def prompt(self, message, text_input=False, timeout_s=None, cli_color=''):
+  def prompt(self, message, prompt_type=PromptType.OKAY, text_input=False, cli_color='', timeout_s=None):
     """Display a prompt and wait for a response.
 
     Args:
       message: A string to be presented to the user.
-      text_input: A boolean indicating whether the user must respond with text.
+      prompt_type: The type of prompt:
+        OKAY: Simple info prompt with an okay button.
+        OKAY_CANCEL: Okay or Cancel buttons.
+        PASS_FAIL: PASS or FAIL buttons.
+        PASS_FAIL_RETRY: PASS, FAIL, RETRY buttons. (not working)
+        
       timeout_s: Seconds to wait before raising a PromptUnansweredError.
       cli_color: An ANSI color code, or the empty string.
 
@@ -181,15 +292,23 @@ class UserInput(plugs.FrontendAwareBasePlug):
       MultiplePromptsError: There was already an existing prompt.
       PromptUnansweredError: Timed out waiting for the user to respond.
     """
-    self.start_prompt(message, text_input, cli_color)
-    return self.wait_for_prompt(timeout_s)
+    self.start_prompt(message, prompt_type, text_input, cli_color)
+    try:
+      return self.wait_for_prompt(timeout_s)
+    except InvalidOption as e:
+      _LOG.info('Option %s is invalid. Please retry.' % e.option)
+      return self.prompt(message, prompt_type, text_input, cli_color, timeout_s)
 
-  def start_prompt(self, message, text_input=False, cli_color=''):
+  def start_prompt(self, message, prompt_type=PromptType.OKAY, text_input=False, cli_color=''):
     """Display a prompt.
 
     Args:
       message: A string to be presented to the user.
-      text_input: A boolean indicating whether the user must respond with text.
+      prompt_type: The type of prompt:
+        OKAY: Simple info prompt with an okay button.
+        OKAY_CANCEL: Okay or Cancel buttons.
+        PASS_FAIL: PASS or FAIL buttons.
+        PASS_FAIL_RETRY: PASS, FAIL, RETRY buttons. (not working)
       cli_color: An ANSI color code, or the empty string.
 
     Raises:
@@ -201,16 +320,23 @@ class UserInput(plugs.FrontendAwareBasePlug):
     with self._cond:
       if self._prompt:
         raise MultiplePromptsError
+      
+      if text_input:
+        prompt_type = PromptType.TEXT_INPUT
+      
       prompt_id = uuid.uuid4().hex
-      _LOG.debug('Displaying prompt (%s): "%s"%s', prompt_id, message,
-                 ', Expects text input.' if text_input else '')
+      _LOG.debug('Displaying prompt (%s): "%s"', prompt_id, message)
 
       self._response = None
       self._prompt = Prompt(
-          id=prompt_id, message=message, text_input=text_input)
+          id=prompt_id, message=message, prompt_type=prompt_type)
+      self._options = prompt_options(prompt_type)
+      self._prompt_type = prompt_type
       if sys.stdin.isatty():
+        console_message = prompt_type_console_message(message, options=self._options)
+        
         self._console_prompt = ConsolePrompt(
-            message, functools.partial(self.respond, prompt_id), cli_color)
+            console_message, functools.partial(self.respond, prompt_id), cli_color)
         self._console_prompt.start()
 
       self.notify_update()
@@ -241,7 +367,9 @@ class UserInput(plugs.FrontendAwareBasePlug):
 
       if self._response is None:
         raise PromptUnansweredError
-      return self._response
+      
+      response = PromptResponse(self._response, self._prompt_type)
+      return response.return_value()
 
   def respond(self, prompt_id, response):
     """Respond to the prompt with the given ID.
@@ -260,6 +388,7 @@ class UserInput(plugs.FrontendAwareBasePlug):
     with self._cond:
       if not (self._prompt and self._prompt.id == prompt_id):
         return False
+      
       self._response = response
       self.last_response = (prompt_id, response)
       self.remove_prompt()

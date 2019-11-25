@@ -39,6 +39,10 @@ export class PhaseComponent {
     this.docExtended = this.sanitizer.bypassSecurityTrustHtml(doc);
   }
 
+  get isTeardown() {
+    return this.phase.runOptions && this.phase.runOptions.type === 'TEARDOWN'; 
+  }
+
   get showDocExtended() {
     const shouldShow = this.expand || (this.expandIfRunning && this.phase.status === PhaseStatus.running);
     return shouldShow && this.phase.docExtended;

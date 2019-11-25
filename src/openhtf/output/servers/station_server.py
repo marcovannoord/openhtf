@@ -16,6 +16,7 @@ import socket
 import threading
 import time
 import types
+import collections
 
 import sockjs.tornado
 
@@ -347,12 +348,24 @@ class PhasesHandler(BaseTestHandler):
     if test is None:
       return
 
+    transform_phase_to_dict = lambda phase: dict(id=id(phase), **data.convert_to_base_types(phase))
+    
     phase_descriptors = [
-        dict(id=id(phase), **data.convert_to_base_types(phase))
+        transform_phase_to_dict(phase)
         for phase in test.descriptor.phase_group]
-
+    
+    
+    
+    phase_tree = test.descriptor.phase_group.build_tree()
+    def tree_to_dict(tree):
+      if isinstance(tree, collections.Iterable):
+        return [tree_to_dict(item) for item in tree]
+      else:
+        return transform_phase_to_dict(tree)
+    
+    phase_tree_dict = tree_to_dict(phase_tree)
     # Wrap value in a dict because writing a list directly is prohibited.
-    self.write({'data': phase_descriptors})
+    self.write({'data': phase_descriptors, 'tree': phase_tree_dict})
 
 
 class PlugsHandler(BaseTestHandler):
