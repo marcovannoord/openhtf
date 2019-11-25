@@ -39,7 +39,7 @@ import { removeNgStyles, createNewHosts } from '@angularclass/hmr';
     StationsModule,
   ],
   declarations: [
-    AppComponent,
+    AppComponent
   ],
   providers: [],
   bootstrap: [

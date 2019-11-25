@@ -6,7 +6,6 @@ import time
 import random
 
 from spintop_openhtf import TestPlan
-from spintop_openhtf.plugs.form_user_input import FormUserInput
 
 import openhtf as htf
 
@@ -20,21 +19,43 @@ plan = TestPlan('examples.hello_world')
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
+FORM_LAYOUT = {
+    'schema':{
+        'title': "Todo",
+        'type': "object",
+        'required': ["title"],
+        'properties': {
+            'title': {
+                'type': "string", 
+                'title': "Title"
+            },
+            'done': {'type': "boolean", 'title': "Done?", 'default': False}
+        }
+    },
+    'layout':[
+        "done",
+        {
+            'key': "title",
+            'type': "section",
+        }
+    ]
+}
+
 @plan.testcase('Hello-World')
 @htf.plugs.plug(prompts=UserInput)
-@htf.plugs.plug(prompt_form=FormUserInput)
 @htf.PhaseOptions(requires_state=True)
-def hello_world(state, prompts, prompt_form):
+def hello_world(state, prompts):
     """Says Hello World !
     
 # Hello World Test
     
 Welcome to the **hello world** test.
     """
+    prompts.prompt_form(FORM_LAYOUT)
     prompts.prompt('Cancel', prompt_type=PromptType.OKAY_CANCEL)
     prompts.prompt('PASS', prompt_type=PromptType.PASS_FAIL)
+    
     state.logger.info('Hello World')
-    prompt_form.prompt('Hello.', {})
     with state.testplan.file_provider.temp_file_url(os.path.join(HERE, 'spinsuite-2.png')) as image_url:
         url = '%s' % image_url
         prompts.prompt("""

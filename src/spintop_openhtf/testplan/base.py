@@ -123,8 +123,7 @@ class TestPlan(DecorativeTestNode):
         def trigger_phase(state, prompts):
             """Test start trigger that prompts the user for a DUT ID."""
             state.testplan = self
-            dut_id = prompts.prompt(
-                message, text_input=True)
+            dut_id = prompts.prompt(message, text_input=True)
             state.test_record.dut_id = validator(dut_id)
         
         trigger_phase.options.name = 'Simple Scan' # Use the testcase name

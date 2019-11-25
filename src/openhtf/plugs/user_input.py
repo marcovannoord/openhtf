@@ -47,7 +47,7 @@ PROMPT = '--> '
 
 PromptType = enum.Enum('PromptType', [
   'OKAY',
-  'TEXT_INPUT',
+  'FORM',
   'OKAY_CANCEL',
   'PASS_FAIL',
   'PASS_FAIL_RETRY'
@@ -103,7 +103,7 @@ class PromptResponse(object):
     if isinstance(response, collections.Mapping):
       self.content = response.get('content', '')
       self.option = response.get('option', None)
-    elif prompt_type != PromptType.TEXT_INPUT:
+    elif prompt_type != PromptType.FORM:
       self.option = response
     
     if not self.option:
@@ -124,6 +124,7 @@ OKAY = PromptOption('OKAY')
 OPTIONS = {
   None: OKAY,
   'OKAY': OKAY,
+  'SUBMIT': PromptOption('Submit'),
   'CANCEL': PromptOption('CANCEL', CancelOption, warning_level=True),
   'PASS': PromptOption('PASS', success_level=True),
   'FAIL': PromptOption('FAIL', FailOption),
@@ -132,10 +133,25 @@ OPTIONS = {
 
 PROMPT_TO_OPTIONS = {
   PromptType.OKAY: [OPTIONS['OKAY']],
-  PromptType.TEXT_INPUT: [OPTIONS['OKAY']],
+  PromptType.FORM: [OPTIONS['SUBMIT']],
   PromptType.OKAY_CANCEL: [OPTIONS['OKAY'], OPTIONS['CANCEL']],
   PromptType.PASS_FAIL: [OPTIONS['PASS'], OPTIONS['FAIL']]
 }
+
+def create_text_input_form(input_message='Input'):
+  return {
+      'schema': {
+          'title': "Generic Input",
+          'type': "object",
+          'required': ["_input"],
+          'properties': {
+              '_input': {
+                  'type': "string", 
+                  'title': input_message
+              }
+          }
+      }
+  }
 
 class PromptInputError(Exception):
   """Raised in the event that a prompt returns without setting the response."""
@@ -150,7 +166,6 @@ class PromptUnansweredError(Exception):
 
 
 Prompt = collections.namedtuple('Prompt', 'id message prompt_type')
-
 
 
 class ConsolePrompt(threading.Thread):
@@ -169,7 +184,7 @@ class ConsolePrompt(threading.Thread):
     """
     super(ConsolePrompt, self).__init__()
     self.daemon = True
-    self._message = message
+    self._message = str(message)
     self._callback = callback
     self._color = color
     self._stop_event = threading.Event()
@@ -271,6 +286,10 @@ class UserInput(plugs.FrontendAwareBasePlug):
         self._console_prompt = None
       self.notify_update()
 
+  def prompt_form(self, json_schema_form, timeout_s=None):
+    message = json_schema_form
+    return self.prompt(message, prompt_type=PromptType.FORM, timeout_s=timeout_s)
+    
   def prompt(self, message, prompt_type=PromptType.OKAY, text_input=False, cli_color='', timeout_s=None):
     """Display a prompt and wait for a response.
 
@@ -292,14 +311,21 @@ class UserInput(plugs.FrontendAwareBasePlug):
       MultiplePromptsError: There was already an existing prompt.
       PromptUnansweredError: Timed out waiting for the user to respond.
     """
-    self.start_prompt(message, prompt_type, text_input, cli_color)
+    if text_input:
+      ret_val = self.prompt_form(create_text_input_form(message))
+      try:
+        return ret_val['_input']
+      except (TypeError, KeyError):
+        return ret_val
+    
+    self.start_prompt(message, prompt_type, cli_color)
     try:
       return self.wait_for_prompt(timeout_s)
     except InvalidOption as e:
       _LOG.info('Option %s is invalid. Please retry.' % e.option)
-      return self.prompt(message, prompt_type, text_input, cli_color, timeout_s)
+      return self.prompt(message, prompt_type, cli_color, timeout_s)
 
-  def start_prompt(self, message, prompt_type=PromptType.OKAY, text_input=False, cli_color=''):
+  def start_prompt(self, message, prompt_type=PromptType.OKAY, cli_color=''):
     """Display a prompt.
 
     Args:
@@ -320,9 +346,6 @@ class UserInput(plugs.FrontendAwareBasePlug):
     with self._cond:
       if self._prompt:
         raise MultiplePromptsError
-      
-      if text_input:
-        prompt_type = PromptType.TEXT_INPUT
       
       prompt_id = uuid.uuid4().hex
       _LOG.debug('Displaying prompt (%s): "%s"', prompt_id, message)

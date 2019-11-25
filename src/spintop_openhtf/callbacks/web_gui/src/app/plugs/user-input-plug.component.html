@@ -11,15 +11,24 @@
 
     <div class="htf-layout-widget-body">
       <!-- <markdown [data]="markdown"></markdown> -->
-      <div [innerHTML]="prompt"></div>
+      <div [innerHTML]="promptHtml"></div>
 
-      <input
+      <div *ngIf="promptForm">
+        <json-schema-form
+          #jsonSchemaForm
+          [form]="promptForm"
+          (onChanges)="formContentChanged($event)"
+          (keyup.enter)="sendResponse()">
+        </json-schema-form>
+      </div>
+
+      <!-- <input
         #response_field
         [style.display]="hasTextInput() ? 'inline' : 'none'"
         [class.user-input-has-error]="error"
         type="text"
         class="u-push-top"
-        (keyup.enter)="sendResponse(response_field)">
+        (keyup.enter)="sendResponse(response_field)"> -->
 
       <div class="user-input-error-text u-push-top-third" *ngIf="error">
         {{ error }}
@@ -30,7 +39,7 @@
           <button
             type="button"
             class="htf-rounded-button-grey user-input-button-{{option.level}}"
-            (click)="sendResponse(response_field, option.key)">
+            (click)="sendResponse(option.key)">
             {{ option.name }}
           </button>
         </div>
