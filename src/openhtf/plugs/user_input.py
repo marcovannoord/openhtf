@@ -124,7 +124,7 @@ OKAY = PromptOption('OKAY')
 OPTIONS = {
   None: OKAY,
   'OKAY': OKAY,
-  'SUBMIT': PromptOption('Submit'),
+  'SUBMIT': PromptOption('SUBMIT', name='Submit'),
   'CANCEL': PromptOption('CANCEL', CancelOption, warning_level=True),
   'PASS': PromptOption('PASS', success_level=True),
   'FAIL': PromptOption('FAIL', FailOption),
