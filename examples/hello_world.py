@@ -64,7 +64,7 @@ Welcome to the **hello world** test.
 This is **Awesome**
 
 Please tell me more.
-<img src="{url}"></img>
+![My-Image]({url})
                     """.format(url=url))
 
 

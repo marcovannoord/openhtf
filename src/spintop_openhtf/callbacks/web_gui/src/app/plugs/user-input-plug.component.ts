@@ -4,7 +4,7 @@
 
 import { trigger } from '@angular/animations';
 
-import { Component, ElementRef, SecurityContext } from '@angular/core';
+import { Component, ElementRef } from '@angular/core';
 import { Http } from '@angular/http';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -94,10 +94,11 @@ export class UserInputPlugComponent extends BasePlug {
           value = '';
         }
         else {
-          message = this.markdownService.compile(message.toString())
-          const safeHtml = this.sanitizer.sanitize(SecurityContext.HTML, message)
+          const markdown = this.markdownService; //.forStation(this.test.station);
+          message = markdown.compile(message.toString())
+          // const safeHtml = this.sanitizer.sanitize(SecurityContext.HTML, message)
                   // .replace(/&#10;/g, '<br>');  // Convert newlines.
-          value = this.sanitizer.bypassSecurityTrustHtml(safeHtml);
+          value = this.sanitizer.bypassSecurityTrustHtml(message);
         }
         return value;
       }

@@ -167,6 +167,7 @@ class PromptUnansweredError(Exception):
 
 Prompt = collections.namedtuple('Prompt', 'id message prompt_type')
 
+CONSOLE_PROMPT = None
 
 class ConsolePrompt(threading.Thread):
   """Thread that displays a prompt to the console and waits for a response.
@@ -260,9 +261,19 @@ class UserInput(plugs.FrontendAwareBasePlug):
     super(UserInput, self).__init__()
     self.last_response = None
     self._prompt = None
-    self._console_prompt = None
     self._response = None
     self._cond = threading.Condition(threading.RLock())
+
+  @property
+  def _console_prompt(self):
+    """ Console prompt is global because it uses the only-available once stdin to capture input.
+    If not global, a new test with create a new plug and any old console prompt will be left hanging.""" 
+    return CONSOLE_PROMPT
+
+  @_console_prompt.setter
+  def _console_prompt(self, value):
+    global CONSOLE_PROMPT
+    CONSOLE_PROMPT = value
 
   def _asdict(self):
     """Return a dictionary representation of the current prompt."""
@@ -283,7 +294,6 @@ class UserInput(plugs.FrontendAwareBasePlug):
       self._prompt = None
       if self._console_prompt:
         self._console_prompt.Stop()
-        self._console_prompt = None
       self.notify_update()
 
   def prompt_form(self, json_schema_form, timeout_s=None):
@@ -358,9 +368,14 @@ class UserInput(plugs.FrontendAwareBasePlug):
       if sys.stdin.isatty():
         console_message = prompt_type_console_message(message, options=self._options)
         
-        self._console_prompt = ConsolePrompt(
-            console_message, functools.partial(self.respond, prompt_id), cli_color)
-        self._console_prompt.start()
+        if self._console_prompt and self._console_prompt.is_alive():
+          # Console prompt still active; replacing callback with new prompt.
+          # Prolly on Windows since the prompt stop function does not interrupt input()
+          self._console_prompt._callback = functools.partial(self.respond, prompt_id)
+        else:
+          self._console_prompt = ConsolePrompt(
+              console_message, functools.partial(self.respond, prompt_id), cli_color)
+          self._console_prompt.start()
 
       self.notify_update()
       return prompt_id
@@ -380,19 +395,18 @@ class UserInput(plugs.FrontendAwareBasePlug):
     start_time = time.time()
 
     with self._cond:
-      if self._prompt:
-        # Waiting in short increments allows sys interrupts to be captured.
-        # This allows Ctrl-C to be used while waiting for a prompt.
-        while not self._cond.wait(0.1):
-          # If no timeout, we just wait continuously
-          if timeout_s is not None and time.time() - start_time > timeout_s:
-            break
+      # Waiting in short increments allows sys interrupts to be captured.
+      # This allows Ctrl-C to be used while waiting for a prompt.
+      while self._prompt and not self._cond.wait(0.5):
+        # If no timeout, we just wait continuously
+        if timeout_s is not None and time.time() - start_time > timeout_s:
+          break
 
-      if self._response is None:
-        raise PromptUnansweredError
-      
-      response = PromptResponse(self._response, self._prompt_type)
-      return response.return_value()
+    if self._response is None:
+      raise PromptUnansweredError
+    
+    response = PromptResponse(self._response, self._prompt_type)
+    return response.return_value()
 
   def respond(self, prompt_id, response):
     """Respond to the prompt with the given ID.

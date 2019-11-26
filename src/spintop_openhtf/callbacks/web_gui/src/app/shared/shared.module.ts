@@ -19,6 +19,7 @@ import { SockJsService } from './sock-js.service';
 import { StatusToClassPipe, StatusToTextPipe } from './status-pipes';
 import { TimeAgoPipe } from './time-ago.pipe';
 import { TimeService } from './time.service';
+import { OpenHTFMarkdownService } from './markdown.service';
 import { TooltipDirective } from './tooltip.directive';
 import { TrimmedTextComponent } from './trimmed-text.component';
 
@@ -43,6 +44,7 @@ import { TrimmedTextComponent } from './trimmed-text.component';
   providers: [
     SockJsService,
     TimeService,
+    OpenHTFMarkdownService
   ],
   exports: [
     CommonModule,
