@@ -48,7 +48,14 @@ setup(
             'output/web_gui/dist/img/*',
             'output/web_gui/*'
         ],
-        'spintop_openhtf': ['VERSION']
+        'spintop_openhtf': [
+            'VERSION',
+            'callbacks/web_gui/dist/*',
+            'callbacks/web_gui/dist/css/*',
+            'callbacks/web_gui/dist/js/*',
+            'callbacks/web_gui/dist/img/*',
+            'callbacks/web_gui/*'
+        ]
     },
     install_requires=[
         'appdirs>=1.0.0',
