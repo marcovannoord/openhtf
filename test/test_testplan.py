@@ -1,8 +1,8 @@
 
 import pytest
 
-from spintop.util import yaml_loader
-from spintop.testplan import TestPlan, ElectricalAnalysisContext
+from spintop_openhtf.util import yaml_loader
+from spintop_openhtf.testplan import TestPlan, ElectricalAnalysisContext
 
 def test_testplan_sequencing():
     plan = TestPlan()
@@ -71,8 +71,6 @@ def fpga_yml_analysis(fpga_yml_content):
     analysis.parse(fpga_yml_content)
     return analysis
 
-def test_children_nodes(fpga_yml_content):
-    
     
 def test_nets_array():
     nets = [

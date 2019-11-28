@@ -2,7 +2,6 @@ import os
 import sys
 import inspect
 from copy import copy
-from spintop.storage import SITE_DATA_DIR
 
 import openhtf as htf
 
@@ -13,6 +12,7 @@ from openhtf.output.callbacks import json_factory
 import webbrowser
 
 from ..callbacks import station_server
+from ..storage import SITE_DATA_DIR
 
 from .. import (
     Test,

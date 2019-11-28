@@ -8,8 +8,6 @@ from setuptools.command.develop import develop as develop_orig
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
-sys.path.append(os.path.join(HERE, 'openhtf'))
-
 with open(os.path.join(HERE, 'src', 'spintop_openhtf', 'VERSION')) as version_file:
     VERSION = version_file.read().strip()
 
@@ -31,11 +29,12 @@ print(packages)
 setup(
     name='spintop-openhtf',
     version=VERSION,
-    description='A complete integration to SpinHub using OpenHTF. OpenHTF is currently vendored-in.',
+    description='A complete integration to spintop and the SPIN Suite using OpenHTF. OpenHTF is currently vendored-in.',
     author='William Laroche',
     author_email='william.laroche@tackv.ca',
     maintainer='William Laroche',
     maintainer_email='william.laroche@tackv.ca',
+    url='https://gitlab.com/tackv/spintop-openhtf',
     package_dir={
         '': 'src',
     },
@@ -52,6 +51,7 @@ setup(
         'spintop_openhtf': ['VERSION']
     },
     install_requires=[
+        'appdirs>=1.0.0',
         'oauth2client>=4.1.0',
         'colorama>=0.3.9,<1.0',
         'contextlib2>=0.5.1,<1.0',

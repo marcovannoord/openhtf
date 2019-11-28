@@ -41,6 +41,8 @@ FORM_LAYOUT = {
     ]
 }
 
+spinsuite_image_url = plan.file_provider.create_url(os.path.join(HERE, 'spinsuite-2.png'))
+
 @plan.testcase('Hello-World')
 @htf.plugs.plug(prompts=UserInput)
 @htf.PhaseOptions(requires_state=True)
@@ -51,21 +53,20 @@ def hello_world(state, prompts):
     
 Welcome to the **hello world** test.
     """
+    
     prompts.prompt_form(FORM_LAYOUT)
     prompts.prompt('Cancel', prompt_type=PromptType.OKAY_CANCEL)
     prompts.prompt('PASS', prompt_type=PromptType.PASS_FAIL)
     
     state.logger.info('Hello World')
-    with state.testplan.file_provider.temp_file_url(os.path.join(HERE, 'spinsuite-2.png')) as image_url:
-        url = '%s' % image_url
-        prompts.prompt("""
+    prompts.prompt("""
 # {url}
 
 This is **Awesome**
 
 Please tell me more.
 ![My-Image]({url})
-                    """.format(url=url))
+                    """.format(url=spinsuite_image_url))
 
 
 @plan.testcase('Hello-World-2')

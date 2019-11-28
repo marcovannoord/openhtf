@@ -7,8 +7,8 @@ from collections import namedtuple
 from oauth2client.service_account import ServiceAccountCredentials
 
 import openhtf as htf
-from spintop.callbacks.gdrive import create_google_drive_outputs, load_credentials_file_with_scope
-from spintop.util.gdrive import GoogleDrive
+from spintop_openhtf.callbacks.gdrive import create_google_drive_outputs, load_credentials_file_with_scope
+from spintop_openhtf.util.gdrive import GoogleDrive
 
 
 
@@ -25,11 +25,11 @@ class DummyCredentials(object):
     def authorize(self, *args, **kwargs):
         pass
 
-import vcr
-vcr = vcr.VCR(
-    filter_headers=['authorization'],
-    cassette_library_dir=os.path.join(HERE, 'cassettes')
-)
+# import vcr
+# vcr = vcr.VCR(
+#     filter_headers=['authorization'],
+#     cassette_library_dir=os.path.join(HERE, 'cassettes')
+# )
 
 def sanitize_token(interaction, current_cassette):
     headers = interaction.data['request']['headers']
@@ -56,7 +56,3 @@ def gwrap():
     credentials = get_credentials()
     gwrap = GoogleDrive(credentials)
     return gwrap
-
-@vcr.use_cassette()
-def test_create_file(gwrap):
-    gwrap.get_or_create_folder('hello')

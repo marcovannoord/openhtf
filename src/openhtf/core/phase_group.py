@@ -72,13 +72,19 @@ class PhaseGroup(mutablerecords.Record(
     elif isinstance(teardown, PhaseGroup):
       teardown = (teardown,)
       
-    setup = tuple(p.as_type(phase_descriptor.PhaseType.SETUP) for p in setup)
-    main = tuple(p.as_type(phase_descriptor.PhaseType.MAIN) for p in main)
-    teardown = tuple(p.as_type(phase_descriptor.PhaseType.TEARDOWN) for p in teardown)
+    setup = tuple(self.fn_as_type(p, phase_descriptor.PhaseType.SETUP) for p in setup)
+    main = tuple(self.fn_as_type(p, phase_descriptor.PhaseType.MAIN) for p in main)
+    teardown = tuple(self.fn_as_type(p, phase_descriptor.PhaseType.TEARDOWN) for p in teardown)
       
     super(PhaseGroup, self).__init__(
         setup=tuple(setup), main=tuple(main), teardown=tuple(teardown),
         name=name)
+
+  def fn_as_type(self, fn, phase_type):
+    try:
+      return fn.as_type(phase_type)
+    except AttributeError:
+      return fn
 
   @classmethod
   def convert_if_not(cls, phases_or_groups):

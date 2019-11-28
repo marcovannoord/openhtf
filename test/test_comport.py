@@ -3,7 +3,7 @@ import time
 import threading
 import queue
 
-from spintop.plugs.comport import ComportInterface
+from spintop_openhtf.plugs.comport import ComportInterface
 
 class FakeSerial(object):
     def __init__(self):

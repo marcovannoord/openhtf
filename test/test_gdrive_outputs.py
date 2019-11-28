@@ -3,9 +3,9 @@ import mock
 
 from openhtf.core import test_record
 
-from spintop.util.gdrive import FileNotFound, load_credentials_file, GoogleDrive, Worksheet, GoogleFolder
+from spintop_openhtf.util.gdrive import FileNotFound, load_credentials_file, GoogleDrive, Worksheet, GoogleFolder
 
-from spintop.callbacks.gdrive import TestRecordToSheetOutput
+from spintop_openhtf.callbacks.gdrive import TestRecordToSheetOutput
 
 def create_test_record(config={}):
      return test_record.TestRecord(
