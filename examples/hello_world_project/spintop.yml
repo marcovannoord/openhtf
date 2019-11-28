@@ -1,0 +1,27 @@
+---
+org: tackv
+name: tackv-hello-world
+version: 0.1.0
+
+dist:
+  ignore:
+    - '*.pyc'
+    - '__pycache__'
+    - 'venv'
+  manifest:
+    - include run.bat
+  setup:
+    description: Hello World Template for spintop-openhtf
+    author: 'William Laroche'
+    author_email: 'william.laroche@tackv.ca'
+    maintainer: 'William Laroche'
+    maintainer_email: 'william.laroche@tackv.ca'
+
+commands:
+  install:
+    - spintop venv create
+    - spintop venv run -m pip install -r requirements.txt 
+  clean:
+    - spintop venv remove
+  run:
+    - spintop venv run main.py

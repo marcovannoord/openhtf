@@ -322,7 +322,7 @@ class Test(object):
       else:
         trigger = test_start
 
-      if should_create_code_info():
+      if should_create_code_info() and trigger:
         trigger.code_info = test_record.CodeInfo.for_function(trigger.func, with_source=should_capture_source())
 
       test_desc = self._get_running_test_descriptor()

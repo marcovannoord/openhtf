@@ -565,10 +565,11 @@ class StationServer(web_gui_server.WebGuiServer):
     #     Currently, if we call logs.ARG_PARSER.parse_known_args() multiple
     #     times, we multiply the number of v's that we get.
     tornado_logger = logging.getLogger('tornado')
-    tornado_logger.propagate = True
-    tornado_logger.setLevel(logging.DEBUG)
+    tornado_logger.propagate = False
+    tornado_logger.setLevel(logging.INFO)
+    
     if not tornado_logger.handlers:
-      tornado_logger.addHandler(logging.StreamHandler())
+      tornado_logger.addHandler(logging.NullHandler())
 
     # Bind port early so that the correct port number can be used in the routes.
     sockets, port = web_gui_server.bind_port(int(conf.station_server_port))

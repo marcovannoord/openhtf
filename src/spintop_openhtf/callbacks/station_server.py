@@ -19,7 +19,6 @@ class StationServer(HTFStationServer):
         super(StationServer, self).__init__(*args, static_files_root=STATIC_FILES_ROOT, **kwargs)
         
         self.file_provider = file_provider
-        self.file_provider.set_prefix(TEMPFILES_PATH)
         
         self.application.add_handlers(
             r".*",  # match any host
@@ -35,19 +34,26 @@ class StationServer(HTFStationServer):
 class TemporaryFileProvider(object):
     def __init__(self):
         self.files = {}
-        self.prefix = ''
+        self.prefix = TEMPFILES_PATH
     
     def set_prefix(self, prefix):
         self.prefix = prefix
     
-    @contextmanager
-    def temp_file_url(self, filename):
+    def create_url(self, filename):
         subpath = self.prefix + str(uuid4())
         self.files[subpath] = filename
+        return subpath
+    
+    def delete_url(self, subpath):
+        del self.files[subpath]
+    
+    @contextmanager
+    def temp_file_url(self, filename):
         try:
+            subpath = self.create_url(filename)
             yield subpath
         finally:
-            del self.files[subpath]
+            self.delete_url(subpath)
             
         
 class TemporaryFileHandler(tornado.web.RequestHandler):

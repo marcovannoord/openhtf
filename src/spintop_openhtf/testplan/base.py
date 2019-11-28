@@ -6,7 +6,12 @@ from spintop.storage import SITE_DATA_DIR
 
 import openhtf as htf
 
+from openhtf.util import conf
 from openhtf.plugs import user_input, BasePlug
+from openhtf.output.callbacks import json_factory
+
+import webbrowser
+
 from ..callbacks import station_server
 
 from .. import (
@@ -16,6 +21,8 @@ from .. import (
 )
 
 HISTORY_BASE_PATH = os.path.join(SITE_DATA_DIR, 'openhtf-history')
+
+DEFAULT = object()
 
 class TestPlanError(Exception): pass
 
@@ -43,6 +50,10 @@ class DecorativeTestNode(object):
     
     def teardown(self, name):
         return self._decorate_phase(name, self._teardown_phases)
+    
+    def plug(self, *args, **kwargs):
+        """Helper method: shortcut to htf.plugs.plug(...)"""
+        return htf.plugs.plug(*args, **kwargs)
     
     def sub_group(self, name):
         group = DecorativeTestNode(name)
@@ -79,6 +90,15 @@ class TestPlan(DecorativeTestNode):
         super(TestPlan, self).__init__(name=name)
         self._top_level_component = None
         self.coverage = None
+        self.file_provider = station_server.TemporaryFileProvider()
+        self.callbacks = []
+        
+        # Array but must contain only one phase.
+        # Array is for compatibility with self._decorate_phase function of parent class.
+        self._trigger_phases = []
+        
+        self.add_callbacks(json_factory.OutputToJSON(
+            os.path.join(HISTORY_BASE_PATH,'{metadata[test_name]}', '{dut_id}-{start_time_millis}-{outcome}.json'), indent=4))
 
     @property
     def history_path(self):
@@ -86,24 +106,48 @@ class TestPlan(DecorativeTestNode):
         if not os.path.exists(path):
             os.makedirs(path)
         return path
+    
+    @property
+    def trigger_phase(self):
+        return self._trigger_phases[0] if self._trigger_phases else None
+    
+    def trigger(self, name):
+        if self.trigger_phase:
+            raise TestPlanError('There can only be one @trigger function.')
+        
+        return self._decorate_phase(name, self._trigger_phases)
 
-    def run(self, callbacks=[]):
-        self.file_provider = station_server.TemporaryFileProvider()
+    def run(self, launch_browser=True, **execute_kwargs):
         with station_server.StationServer(self.file_provider) as server:
-            self.configure(callbacks + [server.publish_final_state])
+            self.add_callbacks(server.publish_final_state)
+            self.configure()
+            
+            if launch_browser and conf['station_server_port']:
+                webbrowser.open('http://localhost:%s' % conf['station_server_port'])
+                
             while True:
                 try:
-                    self.execute()
+                    self.execute(**execute_kwargs)
                 except KeyboardInterrupt:
                     break
     
-    def configure(self, callbacks=[]):
+    def configure(self):
         self.test = Test(self.phase_group, test_name=self.name, _code_info_after_file=__file__)
         self.test.configure(failure_exceptions=(user_input.SecondaryOptionOccured,))
-        self.test.add_output_callbacks(*callbacks)
+        self.test.add_output_callbacks(*self.callbacks)
+        
+    def add_callbacks(self, *callbacks):
+        self.callbacks += callbacks
     
-    def execute(self):
-        return self.test.execute(test_start=self._test_start())
+    def execute(self, test_start=DEFAULT):
+        """ Execute the configured test using the test_start function as a trigger.
+        """
+        if test_start is DEFAULT:
+            if self.trigger_phase is None:
+                self._create_default_trigger()
+            test_start = self.trigger_phase
+            
+        return self.test.execute(test_start=test_start)
     
     def create_plug(self):
         class _SelfReferingPlug(BasePlug):
@@ -115,18 +159,17 @@ class TestPlan(DecorativeTestNode):
     def spintop_plug(self, fn):
         return htf.plugs.plug(spintop=self.create_plug())(fn)
     
-    def _test_start(self, message='Enter a DUT ID in order to start the test.',
+    def _create_default_trigger(self, message='Enter a DUT ID in order to start the test.',
             validator=lambda sn: sn, **state):
         
+        @self.trigger('Simple Scan')
         @htf.PhaseOptions(timeout_s=None, requires_state=True)
         @htf.plugs.plug(prompts=user_input.UserInput)
         def trigger_phase(state, prompts):
             """Test start trigger that prompts the user for a DUT ID."""
-            state.testplan = self
             dut_id = prompts.prompt(message, text_input=True)
             state.test_record.dut_id = validator(dut_id)
-        
-        trigger_phase.options.name = 'Simple Scan' # Use the testcase name
+            
         return trigger_phase
     
     def define_top_level_component(self, _filename_or_component):
