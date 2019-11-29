@@ -20,6 +20,7 @@ alternative serialization schemes, see json_factory.py and mfg_inspector.py for
 examples.
 """
 
+import os
 import contextlib
 try:
    import cPickle as pickle
@@ -86,7 +87,14 @@ class OutputToFile(object):
         test_record, ignore_keys=('code_info', 'phases', 'log_records'))
     pattern = self.filename_pattern
     if isinstance(pattern, six.string_types) or callable(pattern):
-      output_file = self.open_file(util.format_string(pattern, record_dict))
+      filepath = util.format_string(pattern, record_dict)
+      output_folder, _ = os.path.split(filepath)
+      
+      if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+      
+      output_file = self.open_file(filepath)
+      
       try:
         yield output_file
       finally:
