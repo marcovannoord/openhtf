@@ -96,6 +96,7 @@ class TestPlan(DecorativeTestNode):
         # Array but must contain only one phase.
         # Array is for compatibility with self._decorate_phase function of parent class.
         self._trigger_phases = []
+        self._no_trigger = False
         
         self.add_callbacks(json_factory.OutputToJSON(
             os.path.join(HISTORY_BASE_PATH,'{metadata[test_name]}', '{dut_id}-{start_time_millis}-{outcome}.json'), indent=4))
@@ -110,6 +111,14 @@ class TestPlan(DecorativeTestNode):
     @property
     def trigger_phase(self):
         return self._trigger_phases[0] if self._trigger_phases else None
+        
+    def freeze_trigger_phase(self):
+        if self._trigger_phases:
+            pass # OK
+        elif self._no_trigger:
+            pass # Don't create default trigger
+        else:
+            self._create_default_trigger()
     
     def trigger(self, name):
         if self.trigger_phase:
@@ -117,14 +126,19 @@ class TestPlan(DecorativeTestNode):
         
         return self._decorate_phase(name, self._trigger_phases)
 
+    def no_trigger(self):
+        self._no_trigger = True
+
     def run(self, launch_browser=True, **execute_kwargs):
         with station_server.StationServer(self.file_provider) as server:
             self.add_callbacks(server.publish_final_state)
             self.configure()
+            self.assert_runnable() # Check before launching browser
             
             if launch_browser and conf['station_server_port']:
                 webbrowser.open('http://localhost:%s' % conf['station_server_port'])
-                
+
+            
             while True:
                 try:
                     self.execute(**execute_kwargs)
@@ -136,18 +150,26 @@ class TestPlan(DecorativeTestNode):
         self.test.configure(failure_exceptions=(user_input.SecondaryOptionOccured,))
         self.test.add_output_callbacks(*self.callbacks)
         
+        self.freeze_trigger_phase()
+        
     def add_callbacks(self, *callbacks):
         self.callbacks += callbacks
     
-    def execute(self, test_start=DEFAULT):
+    def assert_runnable(self):
+        if not self.is_runnable:
+            # No phases ! Abort now.
+            raise RuntimeError('Test is empty, aborting.')
+    
+    @property
+    def is_runnable(self):
+        phases = self._test_phases + self._trigger_phases
+        return bool(phases)
+    
+    def execute(self):
         """ Execute the configured test using the test_start function as a trigger.
         """
-        if test_start is DEFAULT:
-            if self.trigger_phase is None:
-                self._create_default_trigger()
-            test_start = self.trigger_phase
-            
-        return self.test.execute(test_start=test_start)
+        self.assert_runnable()
+        return self.test.execute(test_start=self.trigger_phase)
     
     def create_plug(self):
         class _SelfReferingPlug(BasePlug):
