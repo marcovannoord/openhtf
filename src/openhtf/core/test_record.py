@@ -122,8 +122,10 @@ class TestRecord(  # pylint: disable=no-init
     }
     ret.update(self._cached_record)
     return ret
-
-
+  
+  def is_started(self):
+    return bool(self.start_time_millis)
+  
 # PhaseResult enumerations are converted to these outcomes by the PhaseState.
 PhaseOutcome = Enum(  # pylint: disable=invalid-name
     'PhaseOutcome', [

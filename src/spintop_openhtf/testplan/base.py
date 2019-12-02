@@ -1,18 +1,19 @@
 import os
 import sys
 import inspect
+import datetime
 from copy import copy
 
 import openhtf as htf
 
 from openhtf.util import conf
 from openhtf.plugs import user_input, BasePlug
-from openhtf.output.callbacks import json_factory
 
 import webbrowser
 
-from ..callbacks import station_server
 from ..storage import SITE_DATA_DIR
+from ..callbacks import station_server
+from ..callbacks.local_storage import LocalStorageOutput
 
 from .. import (
     Test,
@@ -98,9 +99,15 @@ class TestPlan(DecorativeTestNode):
         self._trigger_phases = []
         self._no_trigger = False
         
-        self.add_callbacks(json_factory.OutputToJSON(
-            os.path.join(HISTORY_BASE_PATH,'{metadata[test_name]}', '{dut_id}-{start_time_millis}-{outcome}.json'), indent=4))
+        self.add_callbacks(LocalStorageOutput(self._local_storage_filename_pattern, indent=4))
 
+    def _local_storage_filename_pattern(self, **test_record):
+        folder = '{metadata[test_name]}'.format(**test_record)
+        start_time_datetime = datetime.datetime.fromtimestamp(test_record['start_time_millis']/1000.0)
+        start_time = start_time_datetime.strftime(r"%Y-%m-%d-%H-%M-%S-%f")
+        filename = '{dut_id}-{start_time}-{outcome}.json'.format(start_time=start_time, **test_record)
+        return os.path.join(HISTORY_BASE_PATH, folder, filename)
+    
     @property
     def history_path(self):
         path = os.path.join(HISTORY_BASE_PATH, self.name)

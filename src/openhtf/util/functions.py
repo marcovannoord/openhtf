@@ -37,7 +37,7 @@ def call_once(func):
   works on callables that take no args.
   """
   argspec = getargspec(func)
-  if argspec.args or argspec.varargs:
+  if argspec.args or argspec.varargs or argspec.keywords:
     raise ValueError('Can only decorate functions with no args', func, argspec)
 
   @functools.wraps(func)

@@ -432,13 +432,11 @@ class TestState(util.SubscribableStateMixin):
         'Test already completed with status %s!' % self._status.name)
 
     self.test_record.outcome = test_outcome
-
-    # If we've reached here without 'starting' the test, then we 'start' it just
-    # so we can properly 'end' it.
-    if self.test_record.start_time_millis == 0:
-      self.test_record.start_time_millis = util.time_millis()
-    # The test is done at this point, no further updates to test_record.
-    self.test_record.end_time_millis = util.time_millis()
+    
+    if self.test_record.is_started():
+      # End only if started
+      self.test_record.end_time_millis = util.time_millis()
+      
     self._status = self.Status.COMPLETED
     self.notify_update()
 

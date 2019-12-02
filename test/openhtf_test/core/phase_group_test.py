@@ -216,8 +216,7 @@ class PhaseGroupTest(unittest.TestCase):
         setup=_fake_phases('1', '2', '3', '4'),
         main=_fake_phases('5', '6') + [inner_group] + _fake_phases('7'),
         teardown=_fake_phases('8', '9'))
-    self.assertEqual(
-        _fake_phases(
+    for phase, expected in zip(_fake_phases(
             '1', '2', '3', '4',  # Outer setup.
             '5', '6',  # First outer main.
             'a', 'b',  # Inner setup.
@@ -225,7 +224,8 @@ class PhaseGroupTest(unittest.TestCase):
             'e', 'f',  # Inner teardown.
             '7',  # Rest of outer main.
             '8', '9',  # Outer teardown.
-        ), list(outer_group))
+        ), list(outer_group)):
+          self.assertEqual(phase.name, expected.name)
 
   def testFlatten(self):
     inner = htf.PhaseGroup(
