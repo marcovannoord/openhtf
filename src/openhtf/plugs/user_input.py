@@ -103,11 +103,13 @@ class PromptResponse(object):
     if isinstance(response, collections.Mapping):
       self.content = response.get('content', '')
       self.option = response.get('option', None)
-    elif prompt_type != PromptType.FORM:
-      self.option = response
+    # elif prompt_type != PromptType.FORM:
+    #   self.option = response
     
     if not self.option:
       self.option = None
+    elif isinstance(self.option, PromptOption):
+      self.option = self.option.key
     
     if self.option not in OPTIONS:
       raise InvalidOption(self.option)

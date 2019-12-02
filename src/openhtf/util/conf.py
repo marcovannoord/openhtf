@@ -170,6 +170,7 @@ import six
 
 from . import argv
 from . import threads
+from . import functions
 
 # If provided, --config-file will cause the given file to be load()ed when the
 # conf module is initially imported.
@@ -262,7 +263,7 @@ class Configuration(object):  # pylint: disable=too-many-instance-attributes
       flags = self._flags
     for keyval in flags.config_value:
       k, v = keyval.split('=', 1)
-      v = self._modules['yaml'].load(v) if isinstance(v, str) else v
+      v = self._modules['yaml'].load(v, Loader=self._modules['yaml'].SafeLoader) if isinstance(v, str) else v
 
       # Force any command line keys and values that are bytes to unicode.
       k = k.decode() if isinstance(k, bytes) else k
@@ -565,7 +566,7 @@ class Configuration(object):  # pylint: disable=too-many-instance-attributes
     configuration values for positional arguments.
     """
     inspect = self._modules['inspect']
-    argspec = inspect.getargspec(method)
+    argspec = functions.getargspec(method)
 
     # Index in argspec.args of the first keyword argument.  This index is a
     # negative number if there are any kwargs, or 0 if there are no kwargs.

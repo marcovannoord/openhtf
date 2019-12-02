@@ -30,7 +30,7 @@ import openhtf
 from openhtf import util
 from openhtf.core import test_record
 import openhtf.plugs
-from openhtf.util import data
+from openhtf.util import data, functions
 
 import six
 
@@ -194,10 +194,10 @@ class PhaseDescriptor(mutablerecords.Record(
 
   def with_known_args(self, **kwargs):
     """Send only known keyword-arguments to the phase when called."""
-    argspec = inspect.getargspec(self.func)
+    argspec = inspect.getfullargspec(self.func)
     stored = {}
     for key, arg in six.iteritems(kwargs):
-      if key in argspec.args or argspec.keywords:
+      if argspec.varkw or key in argspec.args or key in argspec.kwonlyargs:
         stored[key] = arg
     if stored:
       return self.with_args(**stored)
@@ -289,12 +289,8 @@ class PhaseDescriptor(mutablerecords.Record(
     kwargs.update(test_state.plug_manager.provide_plugs(
         (plug.name, plug.cls) for plug in self.plugs if plug.update_kwargs))
 
-    if sys.version_info[0] < 3:
-      arg_info = inspect.getargspec(self.func)
-      keywords = arg_info.keywords
-    else:
-      arg_info = inspect.getfullargspec(self.func)
-      keywords = arg_info.varkw
+    arg_info = functions.getargspec(self.func)
+    keywords = arg_info.keywords
     # Pass in test_api if the phase takes *args, or **kwargs with at least 1
     # positional, or more positional args than we have keyword args.
     if arg_info.varargs or (keywords and len(arg_info.args) >= 1) or (

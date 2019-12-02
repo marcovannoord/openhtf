@@ -77,3 +77,23 @@ class PlugsTest(unittest.TestCase):
     self.plug.start_prompt('Test first prompt.')
     with self.assertRaises(user_input.MultiplePromptsError):
       self.plug.start_prompt('Test second prompt.')
+      
+  def test_option_prompt_default(self):
+    prompt_id = self.plug.start_prompt('Test default option.', prompt_type=user_input.PromptType.PASS_FAIL)
+    self.assertIsNotNone(self.plug._asdict())
+    RESPONSE = 'Option-unrelated response triggers default option.'
+    self.plug.respond(prompt_id, RESPONSE)
+    
+    response = self.plug.wait_for_prompt()
+    
+    self.assertEqual(RESPONSE, response)
+    
+  def test_option_prompt_fail(self):
+    prompt_id = self.plug.start_prompt('Test FAIL option (secondary)', prompt_type=user_input.PromptType.PASS_FAIL)
+    self.assertIsNotNone(self.plug._asdict())
+    self.plug.respond(prompt_id, {'option': user_input.OPTIONS['FAIL']})
+    
+    with self.assertRaises(user_input.SecondaryOptionOccured):
+      self.plug.wait_for_prompt()
+
+    

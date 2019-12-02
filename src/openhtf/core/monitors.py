@@ -54,6 +54,7 @@ from openhtf import plugs
 from openhtf.core import measurements
 from openhtf.util import threads
 from openhtf.util import units as uom
+from openhtf.util import functions
 
 
 class _MonitorThread(threads.KillableThread):
@@ -71,7 +72,7 @@ class _MonitorThread(threads.KillableThread):
     self.extra_kwargs = extra_kwargs
 
   def get_value(self):
-    arg_info = inspect.getargspec(self.monitor_desc.func)
+    arg_info = functions.getargspec(self.monitor_desc.func)
     if arg_info.keywords:
       # Monitor phase takes **kwargs, so just pass everything in.
       kwargs = self.extra_kwargs

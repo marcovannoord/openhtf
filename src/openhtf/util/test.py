@@ -131,7 +131,7 @@ from openhtf.core import test_descriptor
 from openhtf.core import test_record
 from openhtf.core import test_state
 from openhtf.plugs import device_wrapping
-from openhtf.util import logs
+from openhtf.util import logs, functions
 import six
 
 logs.CLI_LOGGING_VERBOSITY = 2
@@ -289,7 +289,7 @@ def patch_plugs(**mock_plugs):
     Function decorator that mocks plugs.
   """
   def test_wrapper(test_func):
-    plug_argspec = inspect.getargspec(test_func)
+    plug_argspec = functions.getargspec(test_func)
     num_defaults = len(plug_argspec.defaults or ())
     plug_args = set(plug_argspec.args[1:-num_defaults or None])
 
