@@ -172,7 +172,7 @@ class TestRecordToRowOutput(object):
         return {key: fn(tr) for key, fn in self.COLUMNS}
         
 def millis_to_datetime(millis):
-    return datetime.datetime.fromtimestamp(millis/1000.0)
+    return datetime.datetime.utcfromtimestamp(millis/1000.0)
 
 def next_available_row(worksheet):
     str_list = list(filter(lambda x: bool(x), worksheet.col_values(1)))

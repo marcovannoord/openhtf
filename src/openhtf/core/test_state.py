@@ -434,8 +434,9 @@ class TestState(util.SubscribableStateMixin):
     self.test_record.outcome = test_outcome
     
     if self.test_record.is_started():
-      # End only if started
       self.test_record.end_time_millis = util.time_millis()
+    else:
+      self.test_record.end_time_millis = self.test_record.start_time_millis
       
     self._status = self.Status.COMPLETED
     self.notify_update()

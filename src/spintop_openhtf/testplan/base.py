@@ -103,9 +103,9 @@ class TestPlan(DecorativeTestNode):
 
     def _local_storage_filename_pattern(self, **test_record):
         folder = '{metadata[test_name]}'.format(**test_record)
-        start_time_datetime = datetime.datetime.fromtimestamp(test_record['start_time_millis']/1000.0)
-        start_time = start_time_datetime.strftime(r"%Y-%m-%d-%H-%M-%S-%f")
-        filename = '{dut_id}-{start_time}-{outcome}.json'.format(start_time=start_time, **test_record)
+        start_time_datetime = datetime.datetime.utcfromtimestamp(test_record['start_time_millis']/1000.0)
+        start_time = start_time_datetime.strftime(r"%Y_%m_%d_%H%M%S_%f")
+        filename = '{dut_id}_{start_time}_{outcome}.json'.format(start_time=start_time, **test_record)
         return os.path.join(HISTORY_BASE_PATH, folder, filename)
     
     @property

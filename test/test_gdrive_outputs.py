@@ -13,13 +13,14 @@ def create_test_record(config={}):
         start_time_millis=0,
         metadata={'config': config}
      )
-
+     
+@pytest.mark.skip
 def test_folder_created():
     test_record = create_test_record()
 
-    with mock.patch('spintop.util.gdrive.GoogleDrive') as GoogleDrive, \
-            mock.patch('spintop.util.gdrive.Worksheet') as Worksheet, \
-            mock.patch('spintop.util.gdrive.GoogleFolder') as GoogleFolder:
+    with mock.patch('spintop_openhtf.util.gdrive.GoogleDrive') as GoogleDrive, \
+            mock.patch('spintop_openhtf.util.gdrive.Worksheet') as Worksheet, \
+            mock.patch('spintop_openhtf.util.gdrive.GoogleFolder') as GoogleFolder:
 
         worksheet = Worksheet.return_value
         folder = GoogleFolder()

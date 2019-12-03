@@ -40,6 +40,10 @@ setup(
     },
     packages=packages,
     package_data={
+        'examples': [
+            'example_attachment.txt',
+            'example_config.yaml'
+        ],
         'openhtf': [
             'output/proto/*.proto',
             'output/web_gui/dist/*',

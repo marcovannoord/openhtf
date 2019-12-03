@@ -42,9 +42,9 @@ class GreetPlug(UserInput):
 """ Test Plan """
 
 # This defines the name of the testbench.
-plan = TestPlan('examples.hello_world')
-plan.no_trigger()
-# @plan.trigger('Hello-World')
+plan = TestPlan('examples.getting_started')
+
+@plan.trigger('Hello-World')
 @plan.plug(greet=GreetPlug)
 def hello_world(test, greet):
     """Says Hello World !
@@ -56,7 +56,7 @@ Welcome to the **hello world** test.
     response = greet.prompt_tester_information()
     test.dut_id = response['firstname']
     
-# @plan.testcase('Greet the tester')
+@plan.testcase('Greet the tester')
 @plan.plug(greet=GreetPlug)
 def greet_tester(test, greet):
     greet.greet_tester()

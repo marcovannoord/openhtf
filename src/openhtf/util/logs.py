@@ -294,7 +294,7 @@ class CliFormatter(logging.Formatter):
   def format(self, record):
     """Format the record as tersely as possible but preserve info."""
     super(CliFormatter, self).format(record)
-    localized_time = datetime.datetime.fromtimestamp(record.created)
+    localized_time = datetime.datetime.utcfromtimestamp(record.created)
     terse_time = localized_time.strftime(u'%H:%M:%S')
     terse_level = record.levelname[0]
     terse_name = record.name.split('.')[-1]

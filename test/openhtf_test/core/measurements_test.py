@@ -19,6 +19,7 @@ The test cases here need improvement - they should check for things that we
 actually care about.
 """
 
+import unittest
 import collections
 
 from openhtf.core import measurements
@@ -29,6 +30,10 @@ from examples import all_the_things
 import openhtf as htf
 from openhtf.util import test as htf_test
 
+try:
+  import pandas
+except ImportError:
+  pandas = None
 
 # Fields that are considered 'volatile' for record comparison.
 _VOLATILE_FIELDS = {'start_time_millis', 'end_time_millis', 'timestamp_millis',
@@ -164,6 +169,7 @@ class TestMeasurement(htf_test.TestCase):
     with self.assertRaises(RuntimeError):
       self.test_to_dataframe(units=True)
 
+  @unittest.skipUnless(pandas, 'Requires Pandas to test dataframes')
   def test_to_dataframe(self, units=True):
     measurement = htf.Measurement('test_multidim')
     measurement.with_dimensions('ms', 'assembly',
@@ -193,6 +199,7 @@ class TestMeasurement(htf_test.TestCase):
         measurement.measured_value[coordinates],
         df.query(query)[measure_column_name].values[0])
 
+  @unittest.skipUnless(pandas, 'Requires Pandas to test dataframes')
   def test_to_dataframe__no_units(self):
     self.test_to_dataframe(units=False)
 
