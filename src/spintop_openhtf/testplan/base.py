@@ -3,6 +3,7 @@ import sys
 import inspect
 import datetime
 from copy import copy
+from contextlib import contextmanager
 
 import openhtf as htf
 
@@ -87,8 +88,9 @@ class DecorativeTestNode(object):
         )
     
 class TestPlan(DecorativeTestNode):
-    def __init__(self, name='testplan'):
+    def __init__(self, name='testplan', store_result=True):
         super(TestPlan, self).__init__(name=name)
+        
         self._top_level_component = None
         self.coverage = None
         self.file_provider = station_server.TemporaryFileProvider()
@@ -99,7 +101,8 @@ class TestPlan(DecorativeTestNode):
         self._trigger_phases = []
         self._no_trigger = False
         
-        self.add_callbacks(LocalStorageOutput(self._local_storage_filename_pattern, indent=4))
+        if store_result:
+            self.add_callbacks(LocalStorageOutput(self._local_storage_filename_pattern, indent=4))
 
     def _local_storage_filename_pattern(self, **test_record):
         folder = '{metadata[test_name]}'.format(**test_record)
@@ -137,6 +140,19 @@ class TestPlan(DecorativeTestNode):
         self._no_trigger = True
 
     def run(self, launch_browser=True, **execute_kwargs):
+        with self.station_server_context(launch_browser):
+            while True:
+                try:
+                    self.execute(**execute_kwargs)
+                except KeyboardInterrupt:
+                    break
+    
+    def run_once(self, launch_browser=True, **execute_kwargs):
+        with self.station_server_context(launch_browser):
+            self.execute(**execute_kwargs)
+    
+    @contextmanager
+    def station_server_context(self, launch_browser=True):
         with station_server.StationServer(self.file_provider) as server:
             self.add_callbacks(server.publish_final_state)
             self.configure()
@@ -144,13 +160,9 @@ class TestPlan(DecorativeTestNode):
             
             if launch_browser and conf['station_server_port']:
                 webbrowser.open('http://localhost:%s' % conf['station_server_port'])
-
             
-            while True:
-                try:
-                    self.execute(**execute_kwargs)
-                except KeyboardInterrupt:
-                    break
+            yield
+    
     
     def configure(self):
         self.test = Test(self.phase_group, test_name=self.name, _code_info_after_file=__file__)
