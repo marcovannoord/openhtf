@@ -79,6 +79,7 @@ setup(
         'tornado>=4.3,<5.0',
         'pyserial>=3.3.0,<4.0',
         'jsonschema>=3.0.2',
+        'markdown2>=2.3.8'
     ],
     extras_require={
     },

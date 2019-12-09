@@ -5,6 +5,10 @@ from openhtf.plugs.user_input import UserInput
 from openhtf.util import conf
 
 from spintop_openhtf import TestPlan
+from spintop_openhtf.util.markdown import markdown, image_url
+
+# This defines the name of the testbench.
+plan = TestPlan('examples.getting_started')
 
 FORM_LAYOUT = {
     'schema':{
@@ -24,9 +28,24 @@ FORM_LAYOUT = {
     },
     'layout':[
         "firstname",
-        "lastname"
+        {
+            "type": "help",
+            "helpvalue": markdown("""
+# Well Hello There
+![An Image](%s)
+""" % plan.image_url('spinsuite-2.png'))
+        },
+        {
+            "key": "lastname",
+            "type": "radiobuttons",
+            "titleMap": [
+                { "value": "one", "name": "One" },
+                { "value": "two", "name": "More..." }
+            ]
+        }
     ]
 }
+""" Test Plan """
 
 class GreetPlug(UserInput):
     def prompt_tester_information(self):
@@ -39,10 +58,6 @@ class GreetPlug(UserInput):
         except AttributeError:
             raise Exception("Cannot greet tester before prompt_information")
 
-""" Test Plan """
-
-# This defines the name of the testbench.
-plan = TestPlan('examples.getting_started')
 
 @plan.trigger('Hello-World')
 @plan.plug(greet=GreetPlug)

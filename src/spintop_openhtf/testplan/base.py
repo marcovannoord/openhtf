@@ -2,6 +2,7 @@ import os
 import sys
 import inspect
 import datetime
+
 from copy import copy
 from contextlib import contextmanager
 
@@ -103,6 +104,9 @@ class TestPlan(DecorativeTestNode):
         
         if store_result:
             self.add_callbacks(LocalStorageOutput(self._local_storage_filename_pattern, indent=4))
+
+    def image_url(self, url):
+        return self.file_provider.create_url(url)
 
     def _local_storage_filename_pattern(self, **test_record):
         folder = '{metadata[test_name]}'.format(**test_record)
