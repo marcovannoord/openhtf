@@ -61,7 +61,6 @@ class TemporaryFileHandler(tornado.web.RequestHandler):
         self.files = file_provider.files
     
     async def get(self, *args, **kwargs):
-        print(self.request.path)
         try:
             filename = self.files[self.request.path]
         except KeyError:

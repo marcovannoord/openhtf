@@ -32,8 +32,8 @@ FORM_LAYOUT = {
             "type": "help",
             "helpvalue": markdown("""
 # Well Hello There
-![An Image](%s)
-""" % plan.image_url('spinsuite-2.png'))
+<img src="%s" width="200px" />
+""" % plan.image_url('spinhub-app-icon.png'))
         },
         {
             "key": "lastname",
