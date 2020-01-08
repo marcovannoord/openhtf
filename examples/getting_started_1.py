@@ -24,28 +24,57 @@ FORM_LAYOUT = {
                 'type': "string", 
                 'title': "Last Name"
             },
+            'radio_choice': {
+                'type': "string", 
+                'default': "default",
+                'title': "Radio Choice"
+            },
+            'dropdown': {
+                'type': "string", 
+                'default': "default",
+                'title': "Dropdown"
+            },
         }
     },
     'layout':[
-        "firstname",
         {
             "type": "help",
             "helpvalue": markdown("""
-# Well Hello There
+#Welcome to the Getting Started !
+
+##Introduction
+
+This test simply showcases the custom forms by asking information to the tester and then showing it to him.
+
+##Image showcase
+
 <img src="%s" width="200px" />
-""" % plan.image_url('spinhub-app-icon.png'))
+
+""" % plan.image_url('spinhub-app-icon.png')
+            )
         },
+        "firstname",
+        "lastname",
         {
-            "key": "lastname",
+            "key": "radio_choice",
             "type": "radiobuttons",
             "titleMap": [
-                { "value": "one", "name": "One" },
-                { "value": "two", "name": "More..." }
+                { "value": "One", "name": "One" },
+                { "value": "Two", "name": "Two" }
+            ]
+        },
+        {
+            "key": "dropdown",
+            "type": "select",
+            "titleMap": [
+                { "value": "One", "name": "One" },
+                { "value": "Two", "name": "Two" }
             ]
         }
     ]
 }
-""" Test Plan """
+
+"""Custom Plugs"""
 
 class GreetPlug(UserInput):
     def prompt_tester_information(self):
@@ -54,10 +83,18 @@ class GreetPlug(UserInput):
     
     def greet_tester(self):
         try:
-            self.prompt('Hello {firstname} {lastname} !'.format(**self.__response))
+            self.prompt("""
+Hello {firstname} {lastname} ! 
+
+You chose "{radio_choice}" from the radio buttons.
+You chose "{dropdown}" from the dropdown menu.
+
+""".format(**self.__response)
+            )
         except AttributeError:
             raise Exception("Cannot greet tester before prompt_information")
 
+""" Test Plan """
 
 @plan.trigger('Hello-World')
 @plan.plug(greet=GreetPlug)
@@ -75,6 +112,7 @@ Welcome to the **hello world** test.
 @plan.plug(greet=GreetPlug)
 def greet_tester(test, greet):
     greet.greet_tester()
+    
 
 if __name__ == '__main__':
     conf.load(station_server_port='4444', capture_docstring=True)
