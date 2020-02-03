@@ -75,13 +75,15 @@ setup(
         'PyYAML>=5.0',
         'pyOpenSSL>=17.1.0,<18.0',
         'SheetFu>=1.4.1',
-        'sockjs-tornado>=1.0.3,<2.0',
-        'tornado>=4.3,<5.0',
         'pyserial>=3.3.0,<4.0',
         'jsonschema>=3.0.2',
         'markdown2>=2.3.8'
     ],
     extras_require={
+        'server':[ # Allows the different GUI servers. Can still run without GUI.
+            'tornado>=4.3,<5.0', 
+            'sockjs-tornado>=1.0.3,<2.0',
+        ]
     },
     setup_requires=[
         'wheel>=0.29.0,<1.0',

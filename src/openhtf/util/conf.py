@@ -366,6 +366,11 @@ class Configuration(object):  # pylint: disable=too-many-instance-attributes
     if self._flags.config_file is not None:
       self.load_from_file(self._flags.config_file, _allow_undeclared=True)
 
+  def load_from_filename(self, filename, *args, **kwargs):
+    """Opens the filename and calls load_from_file."""
+    with open(filename) as f:
+      return self.load_from_file(f, *args, **kwargs)
+  
   def load_from_file(self, yamlfile, _override=True, _allow_undeclared=False):
     """Loads the configuration from a file.
 

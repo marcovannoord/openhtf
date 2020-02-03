@@ -3,16 +3,13 @@ import tornado
 
 from tornado import web, iostream
 
-from uuid import uuid4
-
-from contextlib import contextmanager
-
 from openhtf.output.servers.station_server import StationServer as HTFStationServer
+
+from .file_provider import TEMPFILES_PATH
+
 
 WEB_GUI = os.path.join(os.path.dirname(__file__), 'web_gui')
 STATIC_FILES_ROOT = os.path.join(WEB_GUI, 'dist')
-
-TEMPFILES_PATH = '/tempfiles/'
 
 class StationServer(HTFStationServer):
     def __init__(self, file_provider, *args, **kwargs):
@@ -31,29 +28,6 @@ class StationServer(HTFStationServer):
             ]
         )
 
-class TemporaryFileProvider(object):
-    def __init__(self):
-        self.files = {}
-        self.prefix = TEMPFILES_PATH
-    
-    def set_prefix(self, prefix):
-        self.prefix = prefix
-    
-    def create_url(self, filename):
-        subpath = self.prefix + str(uuid4())
-        self.files[subpath] = filename
-        return subpath
-    
-    def delete_url(self, subpath):
-        del self.files[subpath]
-    
-    @contextmanager
-    def temp_file_url(self, filename):
-        try:
-            subpath = self.create_url(filename)
-            yield subpath
-        finally:
-            self.delete_url(subpath)
             
         
 class TemporaryFileHandler(tornado.web.RequestHandler):

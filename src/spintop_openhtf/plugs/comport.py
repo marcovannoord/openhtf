@@ -11,6 +11,12 @@ from queue import Queue
 from asyncio import Protocol
 
 class ComportInterface(Protocol):
+    """An interface to a comport.
+    
+    Allows reading and writing. A background thread reads any data that comes in 
+    and those lines can be accessed using the `next_line` function.
+    
+    """
 
     def __init__(self, comport, baudrate=115200):
         self.comport = comport
@@ -43,8 +49,9 @@ class ComportInterface(Protocol):
         self._reader = ReaderThread(self._serial, lambda: self)
         self._reader.start()
 
-    def write(self, data):
-        return self._reader.write(data.encode('utf8'))
+    def write(self, string):
+        """Write the string into the comport."""
+        return self._reader.write(string.encode('utf8'))
 
     def data_received(self, data):
         if self._timeout_timer is not None:
@@ -93,7 +100,20 @@ class ComportInterface(Protocol):
     def eof_received(self):
         pass
 
-def define_comport_plug(comport_conf_name, comport_conf_baudrate=None):
+def declare_comport_plug(comport_conf_name, comport_conf_baudrate=None):
+    """Creates a new plug class that will retrieve the comport name and baudrate (optionaly) from the openhtf conf.
+    
+    **Parameters:**
+    
+    * **comport_conf_name** - The name of the conf value that holds the comport name.
+    * **comport_conf_baudrate** - (optional) The name of the conf value that holds the comport baudrate.
+    
+    **Returns:**
+    
+    A class that inherits from OpenHTF BasePlug and ComportInterface. This returned class can be used
+    as a plug to feed into an OpenHTF test.
+    
+    """
     conf.declare(comport_conf_name, description='Declared comport accessor name')
 
     if comport_conf_baudrate is not None:

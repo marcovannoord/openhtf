@@ -14,7 +14,7 @@ from openhtf.plugs import user_input, BasePlug
 import webbrowser
 
 from ..storage import SITE_DATA_DIR
-from ..callbacks import station_server
+from ..callbacks.file_provider import TemporaryFileProvider
 from ..callbacks.local_storage import LocalStorageOutput
 
 from .. import (
@@ -94,7 +94,7 @@ class TestPlan(DecorativeTestNode):
         
         self._top_level_component = None
         self.coverage = None
-        self.file_provider = station_server.TemporaryFileProvider()
+        self.file_provider = TemporaryFileProvider()
         self.callbacks = []
         
         # Array but must contain only one phase.
@@ -157,6 +157,7 @@ class TestPlan(DecorativeTestNode):
     
     @contextmanager
     def station_server_context(self, launch_browser=True):
+        from ..callbacks import station_server
         with station_server.StationServer(self.file_provider) as server:
             self.add_callbacks(server.publish_final_state)
             self.configure()

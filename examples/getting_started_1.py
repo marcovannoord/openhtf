@@ -5,7 +5,7 @@ from openhtf.plugs.user_input import UserInput
 from openhtf.util import conf
 
 from spintop_openhtf import TestPlan
-from spintop_openhtf.util.markdown import markdown, image_url
+from spintop_openhtf.util.markdown import markdown
 
 # This defines the name of the testbench.
 plan = TestPlan('examples.getting_started')

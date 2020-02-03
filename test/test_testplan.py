@@ -1,4 +1,10 @@
 import pytest
+try:
+    import tornado
+    TORNADO_AVAILABLE = True
+except ImportError:
+    TORNADO_AVAILABLE = False
+    
 from spintop_openhtf import TestPlan
 
 A_TEST_PLAN_NAME = 'test-plan'
@@ -18,7 +24,8 @@ def test_simple_testcase(test_plan):
     
     assert test_plan.trigger_phase is not None
     assert test_plan.phase_group.main and test_plan.phase_group.main[0].name == A_TEST_NAME
-    
+
+@pytest.mark.skipif(not TORNADO_AVAILABLE, reason="Requires the GUI extras [server]")
 def test_no_trigger_and_run_with_gui(test_plan):
     test_plan.no_trigger()
     executed = []
