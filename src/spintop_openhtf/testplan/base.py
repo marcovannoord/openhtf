@@ -29,7 +29,7 @@ DEFAULT = object()
 
 class TestPlanError(Exception): pass
 
-class DecorativeTestNode(object):
+class TestSequence(object):
     def __init__(self, name):
         self._setup_phases = []
         self._test_phases = []
@@ -37,18 +37,20 @@ class DecorativeTestNode(object):
         self.name = name
     
     def setup(self, name):
+        """Decorator factory for a setup function.
+        
+        ```python
+        my_sequence = TestSequence('Parent')
+        
+        @my_sequence.setup('my-setup-name')
+        def setup_fn(test):
+            (...)
+        
+        ```
+        """
         return self._decorate_phase(name, self._setup_phases)
     
-    def testcase(self, name, tests=None, targets=[]):
-        # if tests and self._top_level_component is None:
-        #     raise TestPlanError('The top level component must be defined using the define_top_level_component function of TestPlan in order to use tests or targets coverage parameters.')
-        
-        # def _note_fn(fn):
-        #     phase = self._add_phase(fn, name, self._test_phases)
-        #     # if tests:
-        #     #     print(self.coverage.add_test(tests, name, allow_links_to=targets))
-            
-        #     return phase
+    def testcase(self, name):
         return self._decorate_phase(name, self._test_phases)
     
     def teardown(self, name):
@@ -58,11 +60,29 @@ class DecorativeTestNode(object):
         """Helper method: shortcut to htf.plugs.plug(...)"""
         return htf.plugs.plug(*args, **kwargs)
     
-    def sub_group(self, name):
-        group = DecorativeTestNode(name)
-        self._test_phases.append(group)
+    def sub_sequence(self, name):
+        """Create new empty TestSequence and append it to this sequence.
+        
+        The following two snippets are equivalent:
+        
+        ```python
+        my_sequence = TestSequence('Parent')
+        sub_sequence = my_sequence.sub_sequence('Child')
+        ```
+        
+        ```python
+        my_sequence = TestSequence('Parent')
+        sub_sequence = TestSequence('Child')
+        my_sequence.append(sub_sequence)
+        ```
+        """
+        group = TestSequence(name)
+        self.append(group)
         return group
     
+    def append(self, phase):
+        self._test_phases.append(phase)
+        
     def _decorate_phase(self, name, array):
         def _note_fn(fn):
             phase = self._add_phase(fn, name, array)
@@ -88,7 +108,7 @@ class DecorativeTestNode(object):
             name=self.name
         )
     
-class TestPlan(DecorativeTestNode):
+class TestPlan(TestSequence):
     def __init__(self, name='testplan', store_result=True):
         super(TestPlan, self).__init__(name=name)
         
@@ -104,6 +124,8 @@ class TestPlan(DecorativeTestNode):
         
         if store_result:
             self.add_callbacks(LocalStorageOutput(self._local_storage_filename_pattern, indent=4))
+            
+        self.failure_exceptions = (user_input.SecondaryOptionOccured,)
 
     def image_url(self, url):
         return self.file_provider.create_url(url)
@@ -171,7 +193,7 @@ class TestPlan(DecorativeTestNode):
     
     def configure(self):
         self.test = Test(self.phase_group, test_name=self.name, _code_info_after_file=__file__)
-        self.test.configure(failure_exceptions=(user_input.SecondaryOptionOccured,))
+        self.test.configure(failure_exceptions=self.failure_exceptions)
         self.test.add_output_callbacks(*self.callbacks)
         
         self.freeze_trigger_phase()

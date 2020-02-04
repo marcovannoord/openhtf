@@ -1,5 +1,3 @@
-""" The main spintop entry point. """
-
 from .core.test_descriptor import (
     Test
 )
@@ -13,4 +11,8 @@ from .standard import (
     get_env,
     is_development_env,
     is_production_env
+)
+
+from openhtf import (
+    PhaseResult
 )

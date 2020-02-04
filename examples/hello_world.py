@@ -75,7 +75,7 @@ def hello_world(test, prompts):
     """Says Hello World 2 !"""
     test.logger.info('Hello World 2')
 
-sub_group = plan.sub_group('sub-group')
+sub_group = plan.sub_sequence('sub-group')
 
 @sub_group.testcase('sub Hello')
 def hello_world(test):
