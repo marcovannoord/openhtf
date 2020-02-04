@@ -60,6 +60,10 @@ class TestSequence(object):
         """Helper method: shortcut to htf.plugs.plug(...)"""
         return htf.plugs.plug(*args, **kwargs)
     
+    def measures(self, *args, **kwargs):
+        """Helper method: shortcut to htf.measures(...)"""
+        return htf.plugs.plug(*args, **kwargs)
+    
     def sub_sequence(self, name):
         """Create new empty TestSequence and append it to this sequence.
         

@@ -3,7 +3,8 @@ from .core.test_descriptor import (
 )
 
 from .testplan.base import (
-    TestPlan
+    TestPlan,
+    TestSequence
 )
 
 from .standard import (
@@ -13,6 +14,6 @@ from .standard import (
     is_production_env
 )
 
-from openhtf import (
-    PhaseResult
-)
+from openhtf import *
+
+from openhtf.util import conf

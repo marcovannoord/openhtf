@@ -5,7 +5,7 @@ try:
 except ImportError:
     TORNADO_AVAILABLE = False
     
-from spintop_openhtf import TestPlan
+from spintop_openhtf import TestPlan, PhaseResult
 
 A_TEST_PLAN_NAME = 'test-plan'
 A_TEST_NAME = 'Test1'
@@ -58,6 +58,42 @@ def test_custom_trigger(test_plan):
     
     assert len(executed) == 2
     
+def test_setup_fn(test_plan):
+    test_plan.no_trigger()
+    executed = []
+    
+    assert not executed
+    
+    @test_plan.setup('fail-setup')
+    def test_fail_setup(test):
+        executed.append(True)
+        return PhaseResult.STOP 
+    
+    @test_plan.testcase(A_TEST_NAME)
+    def test_1(test): # pylint: disable=unused-variable
+        executed.append(True)
+    
+    test_plan.configure()
+    test_plan.execute()
+    
+    assert len(executed) == 1
+    
+def test_sub_sequence(test_plan):
+    test_plan.no_trigger()
+    executed = []
+    
+    def my_test(test):
+        executed.append(True)
+        
+    test_plan.testcase('test1')(my_test) # 1
+    subseq = test_plan.sub_sequence('subseq')
+    subseq.testcase('test2')(my_test) # 2
+    subseq.testcase('test3')(my_test) # 3
+    
+    test_plan.configure()
+    test_plan.execute()
+    assert len(executed) == 3
+        
     
     
     
