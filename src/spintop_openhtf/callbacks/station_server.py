@@ -1,10 +1,9 @@
 import os
+import warnings
 import tornado
 
 from tornado import web, iostream
-
 from openhtf.output.servers.station_server import StationServer as HTFStationServer
-
 from .file_provider import TEMPFILES_PATH
 
 

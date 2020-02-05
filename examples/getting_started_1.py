@@ -1,14 +1,14 @@
 import os
 
-import openhtf as htf
 from openhtf.plugs.user_input import UserInput
-from openhtf.util import conf
 
-from spintop_openhtf import TestPlan
+from spintop_openhtf import TestPlan, conf
 from spintop_openhtf.util.markdown import markdown
 
 # This defines the name of the testbench.
 plan = TestPlan('examples.getting_started')
+
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 FORM_LAYOUT = {
     'schema':{
@@ -50,7 +50,7 @@ This test simply showcases the custom forms by asking information to the tester 
 
 <img src="%s" width="200px" />
 
-""" % plan.image_url('spinhub-app-icon.png')
+""" % plan.image_url(os.path.join(HERE, 'spinhub-app-icon.png'))
             )
         },
         "firstname",
@@ -112,7 +112,6 @@ Welcome to the **hello world** test.
 @plan.plug(greet=GreetPlug)
 def greet_tester(test, greet):
     greet.greet_tester()
-    
 
 if __name__ == '__main__':
     conf.load(station_server_port='4444', capture_docstring=True)

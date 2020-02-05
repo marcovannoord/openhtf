@@ -2,6 +2,7 @@ import os
 import sys
 import inspect
 import datetime
+import warnings
 
 from copy import copy
 from contextlib import contextmanager
@@ -16,6 +17,20 @@ import webbrowser
 from ..storage import SITE_DATA_DIR
 from ..callbacks.file_provider import TemporaryFileProvider
 from ..callbacks.local_storage import LocalStorageOutput
+
+
+try:
+    import tornado
+except ImportError:
+    warnings.warn(
+        'Tornado not available. GUI server will not work. '
+        'If you wish to install it, you may install spintop-openhtf '
+        'with the [server] dependency, such as '
+        'pip install spintop-openhtf[server]. Do note that this requires '
+        'tornado<5.0.'
+    )
+else:
+    from ..callbacks import station_server
 
 from .. import (
     Test,
@@ -51,9 +66,13 @@ class TestSequence(object):
         return self._decorate_phase(name, self._setup_phases)
     
     def testcase(self, name):
+        """Decorator factory for a normal phase. 
+        """
         return self._decorate_phase(name, self._test_phases)
     
     def teardown(self, name):
+        """Decorator factory for a teardown phase. 
+        """
         return self._decorate_phase(name, self._teardown_phases)
     
     def plug(self, *args, **kwargs):
@@ -113,9 +132,14 @@ class TestSequence(object):
         )
     
 class TestPlan(TestSequence):
+    DEFAULT_CONF = dict(
+        station_server_port='4444', 
+        capture_docstring=True
+    )
     def __init__(self, name='testplan', store_result=True):
         super(TestPlan, self).__init__(name=name)
         
+        self._execute_test = None
         self._top_level_component = None
         self.coverage = None
         self.file_provider = TemporaryFileProvider()
@@ -127,19 +151,16 @@ class TestPlan(TestSequence):
         self._no_trigger = False
         
         if store_result:
-            self.add_callbacks(LocalStorageOutput(self._local_storage_filename_pattern, indent=4))
+            self.add_callbacks(LocalStorageOutput(_local_storage_filename_pattern, indent=4))
             
         self.failure_exceptions = (user_input.SecondaryOptionOccured,)
 
-    def image_url(self, url):
-        return self.file_provider.create_url(url)
-
-    def _local_storage_filename_pattern(self, **test_record):
-        folder = '{metadata[test_name]}'.format(**test_record)
-        start_time_datetime = datetime.datetime.utcfromtimestamp(test_record['start_time_millis']/1000.0)
-        start_time = start_time_datetime.strftime(r"%Y_%m_%d_%H%M%S_%f")
-        filename = '{dut_id}_{start_time}_{outcome}.json'.format(start_time=start_time, **test_record)
-        return os.path.join(HISTORY_BASE_PATH, folder, filename)
+    @property
+    def execute_test(self):
+        """Returns a function that takes no arguments and that executes the test described by this test plan."""
+        if not self._execute_test:
+            self.freeze_test()
+        return self._execute_test
     
     @property
     def history_path(self):
@@ -149,18 +170,25 @@ class TestPlan(TestSequence):
         return path
     
     @property
+    def is_runnable(self):
+        phases = self._test_phases + self._trigger_phases
+        return bool(phases)
+    
+    @property
     def trigger_phase(self):
         return self._trigger_phases[0] if self._trigger_phases else None
         
-    def freeze_trigger_phase(self):
-        if self._trigger_phases:
-            pass # OK
-        elif self._no_trigger:
-            pass # Don't create default trigger
-        else:
-            self._create_default_trigger()
+    def image_url(self, url):
+        return self.file_provider.create_url(url)
     
     def trigger(self, name):
+        """Decorator factory for the trigger phase. 
+        
+        Similar to `testcase`, except that this function will be used as the test trigger.
+        
+        The test trigger is a special test phase that is executed before test officialy start.
+        Once this phase is complete, the test will start. Usually used to configure the test with
+        the DUT id for example."""
         if self.trigger_phase:
             raise TestPlanError('There can only be one @trigger function.')
         
@@ -168,40 +196,7 @@ class TestPlan(TestSequence):
 
     def no_trigger(self):
         self._no_trigger = True
-
-    def run(self, launch_browser=True, **execute_kwargs):
-        with self.station_server_context(launch_browser):
-            while True:
-                try:
-                    self.execute(**execute_kwargs)
-                except KeyboardInterrupt:
-                    break
     
-    def run_once(self, launch_browser=True, **execute_kwargs):
-        with self.station_server_context(launch_browser):
-            self.execute(**execute_kwargs)
-    
-    @contextmanager
-    def station_server_context(self, launch_browser=True):
-        from ..callbacks import station_server
-        with station_server.StationServer(self.file_provider) as server:
-            self.add_callbacks(server.publish_final_state)
-            self.configure()
-            self.assert_runnable() # Check before launching browser
-            
-            if launch_browser and conf['station_server_port']:
-                webbrowser.open('http://localhost:%s' % conf['station_server_port'])
-            
-            yield
-    
-    
-    def configure(self):
-        self.test = Test(self.phase_group, test_name=self.name, _code_info_after_file=__file__)
-        self.test.configure(failure_exceptions=self.failure_exceptions)
-        self.test.add_output_callbacks(*self.callbacks)
-        
-        self.freeze_trigger_phase()
-        
     def add_callbacks(self, *callbacks):
         self.callbacks += callbacks
     
@@ -210,16 +205,63 @@ class TestPlan(TestSequence):
             # No phases ! Abort now.
             raise RuntimeError('Test is empty, aborting.')
     
-    @property
-    def is_runnable(self):
-        phases = self._test_phases + self._trigger_phases
-        return bool(phases)
-    
     def execute(self):
         """ Execute the configured test using the test_start function as a trigger.
         """
+        return self.execute_test()
+    
+    def run_once(self, launch_browser=True):
+        return self.run(launch_browser=launch_browser, once=True)
+    
+    def run(self, launch_browser=True, once=False):
+        self.freeze_test()
+        with self._station_server_context(launch_browser):
+            while True:
+                try:
+                    self.execute()
+                except KeyboardInterrupt:
+                    break
+                finally:
+                    if once:
+                        break
+    
+    def freeze_test(self):
+        self._execute_test = self._create_execute_test()
+        
+    @contextmanager
+    def _station_server_context(self, launch_browser=True):
+        with station_server.StationServer(self.file_provider) as server:
+            self.add_callbacks(server.publish_final_state)
+            self.assert_runnable() # Check before launching browser
+            
+            if launch_browser and conf['station_server_port']:
+                webbrowser.open('http://localhost:%s' % conf['station_server_port'])
+            
+            yield
+    
+    def _create_execute_test(self):
         self.assert_runnable()
-        return self.test.execute(test_start=self.trigger_phase)
+        
+        conf.load_from_dict(self.DEFAULT_CONF, _override=False)
+        test = Test(self.phase_group, test_name=self.name, _code_info_after_file=__file__)
+        test.configure(failure_exceptions=self.failure_exceptions)
+        test.add_output_callbacks(*self.callbacks)
+        
+        
+        trigger_phase = self._build_trigger_phase()
+        
+        def execute_test():
+            return test.execute(test_start=trigger_phase)
+
+        return execute_test
+        
+    def _build_trigger_phase(self):
+        if self.trigger_phase:
+            return self.trigger_phase
+        elif self._no_trigger:
+            return None
+        else:
+            return create_default_trigger()
     
     def create_plug(self):
         class _SelfReferingPlug(BasePlug):
@@ -231,27 +273,26 @@ class TestPlan(TestSequence):
     def spintop_plug(self, fn):
         return htf.plugs.plug(spintop=self.create_plug())(fn)
     
-    def _create_default_trigger(self, message='Enter a DUT ID in order to start the test.',
-            validator=lambda sn: sn, **state):
-        
-        @self.trigger('Simple Scan')
-        @htf.PhaseOptions(timeout_s=None, requires_state=True)
-        @htf.plugs.plug(prompts=user_input.UserInput)
-        def trigger_phase(state, prompts):
-            """Test start trigger that prompts the user for a DUT ID."""
-            dut_id = prompts.prompt(message, text_input=True)
-            state.test_record.dut_id = validator(dut_id)
-            
-        return trigger_phase
-    
-    def define_top_level_component(self, _filename_or_component):
-        if isinstance(_filename_or_component, str):
-            component = load_component_file(_filename_or_component)
-        else:
-            component = _filename_or_component
-        self._top_level_component = component
-        self.coverage = CoverageAnalysis(self._top_level_component)
 
+def _local_storage_filename_pattern(**test_record):
+    folder = '{metadata[test_name]}'.format(**test_record)
+    start_time_datetime = datetime.datetime.utcfromtimestamp(test_record['start_time_millis']/1000.0)
+    start_time = start_time_datetime.strftime(r"%Y_%m_%d_%H%M%S_%f")
+    filename = '{dut_id}_{start_time}_{outcome}.json'.format(start_time=start_time, **test_record)
+    return os.path.join(HISTORY_BASE_PATH, folder, filename)
+    
+def create_default_trigger(message='Enter a DUT ID in order to start the test.',
+        validator=lambda sn: sn, **state):
+    
+    @htf.PhaseOptions(timeout_s=None, requires_state=True)
+    @htf.plugs.plug(prompts=user_input.UserInput)
+    def trigger_phase(state, prompts):
+        """Test start trigger that prompts the user for a DUT ID."""
+        dut_id = prompts.prompt(message, text_input=True)
+        state.test_record.dut_id = validator(dut_id)
+        
+    return trigger_phase
+    
 def ensure_htf_phase(fn):
     if not hasattr(fn, 'options'):
         # Not a htf phase, decorate it so it becomes one.

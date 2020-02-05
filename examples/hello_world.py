@@ -93,7 +93,6 @@ def cleanup(test):
     test.logger.info('Cleaned up.')
 
 if __name__ == '__main__':
-    conf.load(station_server_port='4444', capture_docstring=True)
     plan.run()
 
 
