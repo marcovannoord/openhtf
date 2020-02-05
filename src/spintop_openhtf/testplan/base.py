@@ -214,7 +214,6 @@ class TestPlan(TestSequence):
         return self.run(launch_browser=launch_browser, once=True)
     
     def run(self, launch_browser=True, once=False):
-        self.freeze_test()
         with self._station_server_context(launch_browser):
             while True:
                 try:
@@ -233,6 +232,7 @@ class TestPlan(TestSequence):
         with station_server.StationServer(self.file_provider) as server:
             self.add_callbacks(server.publish_final_state)
             self.assert_runnable() # Check before launching browser
+            self.freeze_test()
             
             if launch_browser and conf['station_server_port']:
                 webbrowser.open('http://localhost:%s' % conf['station_server_port'])
