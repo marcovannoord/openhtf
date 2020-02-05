@@ -34,7 +34,7 @@ class BasicCodeCaptureTest(unittest.TestCase):
 
   @htf.conf.save_and_restore
   def testNotCaptured(self):
-    htf.conf.load(capture_source=False)
+    htf.conf.load(capture_source=False, capture_docstring=False)
     test = htf.Test(phase)
     phase_descriptor = list(test.descriptor.phase_group)[0]
     self.assertEqual(phase_descriptor.code_info.name, '')

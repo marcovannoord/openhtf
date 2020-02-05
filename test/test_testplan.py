@@ -20,9 +20,6 @@ def test_simple_testcase(test_plan):
     def test_1(test): # pylint: disable=unused-variable
         pass
     
-    test_plan.configure()
-    
-    assert test_plan.trigger_phase is not None
     assert test_plan.phase_group.main and test_plan.phase_group.main[0].name == A_TEST_NAME
 
 @pytest.mark.skipif(not TORNADO_AVAILABLE, reason="Requires the GUI extras [server]")
@@ -53,7 +50,6 @@ def test_custom_trigger(test_plan):
     def test_1(test): # pylint: disable=unused-variable
         executed.append(True)
     
-    test_plan.configure()
     test_plan.execute()
     
     assert len(executed) == 2
@@ -73,7 +69,6 @@ def test_setup_fn(test_plan):
     def test_1(test): # pylint: disable=unused-variable
         executed.append(True)
     
-    test_plan.configure()
     test_plan.execute()
     
     assert len(executed) == 1
@@ -90,7 +85,6 @@ def test_sub_sequence(test_plan):
     subseq.testcase('test2')(my_test) # 2
     subseq.testcase('test3')(my_test) # 3
     
-    test_plan.configure()
     test_plan.execute()
     assert len(executed) == 3
         
