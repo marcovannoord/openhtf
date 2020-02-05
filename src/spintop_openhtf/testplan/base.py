@@ -178,6 +178,10 @@ class TestPlan(TestSequence):
     def trigger_phase(self):
         return self._trigger_phases[0] if self._trigger_phases else None
         
+    @property
+    def is_test_frozen(self):
+        return bool(self._execute_test)
+        
     def image_url(self, url):
         return self.file_provider.create_url(url)
     
@@ -198,6 +202,8 @@ class TestPlan(TestSequence):
         self._no_trigger = True
     
     def add_callbacks(self, *callbacks):
+        if self.is_test_frozen:
+            raise RuntimeError('Cannot add callbacks to the test plan after the test was frozen.')
         self.callbacks += callbacks
     
     def assert_runnable(self):
