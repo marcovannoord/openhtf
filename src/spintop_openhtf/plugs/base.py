@@ -5,6 +5,13 @@ from spintop_openhtf import conf, plugs
 DEFAULT_FORMAT = '%(asctime)-15s: %(message)s'
 
 class UnboundPlug(object):
+    def __init__(self):
+        super().__init__()
+        if not hasattr(self, 'logger'):
+            # Check conditionnaly because openhtf BasePlug will raise an
+            # exception if we define self.logger.
+            self.logger = logging.getLogger(str(id(self)))
+
     def tearDown(self):
         """Tear down the plug instance."""
         self.close()

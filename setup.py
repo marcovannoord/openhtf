@@ -76,6 +76,7 @@ setup(
         'pyOpenSSL>=17.1.0,<18.0',
         'SheetFu>=1.4.1',
         'pyserial>=3.3.0,<4.0',
+        'paramiko',
         'jsonschema>=3.0.2',
         'markdown2>=2.3.8'
     ],
