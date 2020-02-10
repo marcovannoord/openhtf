@@ -6,11 +6,9 @@ import time
 import serial
 from serial.threaded import ReaderThread
 
-import threading
-from queue import Queue
-from asyncio import Protocol
+from .base import IOInterface
 
-class ComportInterface(Protocol):
+class ComportInterface(IOInterface):
     """An interface to a comport.
     
     Allows reading and writing. A background thread reads any data that comes in 
@@ -19,27 +17,12 @@ class ComportInterface(Protocol):
     """
 
     def __init__(self, comport, baudrate=115200):
+        super().__init__()
         self.comport = comport
         self.baudrate = baudrate
 
         self._serial = None
         self._reader = None
-        self._line_buffer = ""
-        self._read_lines = Queue()
-        self._timeout_timer = None
-        self._last_receive_time = None
-
-        self.timeout = 0.5
-        self.eol = "\n"
-
-    def tearDown(self):
-        """Tear down the plug instance."""
-        self.close()
-
-    def close(self):
-        if self._reader is not None and self._serial.is_open:
-            self._reader.close()
-            self._reader = None
 
     def open(self, _serial=None):
         self.close()
@@ -49,56 +32,50 @@ class ComportInterface(Protocol):
         self._reader = ReaderThread(self._serial, lambda: self)
         self._reader.start()
 
+    def close(self):
+        if self._reader is not None and self._serial.is_open:
+            self._reader.close()
+            self._reader = None
+
     def write(self, string):
         """Write the string into the comport."""
         return self._reader.write(string.encode('utf8'))
 
-    def data_received(self, data):
-        if self._timeout_timer is not None:
-            self._timeout_timer.cancel()
-        
-        force_clear = False
-        if self.check_receive_delta() and data is None and self._line_buffer:
-            force_clear = True
-
-        data_to_queue = None
-
-        if not data:
-            data = b''
-
-        string = data.decode('utf8')
-        if force_clear or string.endswith(self.eol) or (self._line_buffer + string).endswith(self.eol):
-            data_to_queue = self._line_buffer + string
-            self._line_buffer = ""
+    def message_target(self, message, target, timeout=None, keeplines=0, poll_rate=0.05, **kwargs):
+        to_raises = getattr(self, '_timeout_raises', True)
+        to_raises = kwargs.pop('TO_raises', to_raises)
+        contentstring = StringIO.StringIO()
+        if isinstance(target, basestring):
+            targets = self._parse_target(target)
         else:
-            self._line_buffer += string
-        
-        self._timeout_timer = threading.Timer(self.timeout, self.no_data_received)
-        self._timeout_timer.start()
+            targets = target
 
-        if data_to_queue:
-            self._read_lines.put(data_to_queue)
+        target_found = [None]
+        def callback(content):
+            if hasattr(content, 'read'):
+                contentstring.write(content.read)
+                for targetstr in targets:
+                    if targetstr in content.read:
+                        target_found[0] = targetstr
+                        self.end_poll_early()
 
-    def no_data_received(self):
-        return self.data_received(None)
-
-    def check_receive_delta(self):
-        if self._last_receive_time:
-            delta = time.time() - self._last_receive_time
+        with self as client:
+            client.service(message=message, keeplines=keeplines)
+            client.poll(callback, poll_rate, float(timeout))
+        contentlog = contentstring.getvalue()
+        contentstring.close()
+        target_found = target_found[0]
+        if target_found is None:
+            if to_raises:
+                raise ChannelServiceError('Message Target: timeout occured while waiting for %s' % str(targets))
+            else:
+                log_message = 'Message Target: timeout occured while waiting for %s' % str(targets)
         else:
-            delta = 0
+            log_message='Message Target: Found %s' % target_found
+        client.service(log_message=log_message)
+        return contentlog
 
-        self._last_receive_time = time.time()
 
-        return delta > self.timeout
-
-    def next_line(self, timeout=10):
-        """ Waits up to timeout seconds and return the next line available in the buffer.
-        """
-        return self._read_lines.get(timeout=timeout)
-
-    def eof_received(self):
-        pass
 
 def declare_comport_plug(comport_conf_name, comport_conf_baudrate=None):
     """Creates a new plug class that will retrieve the comport name and baudrate (optionaly) from the openhtf conf.

@@ -3,7 +3,7 @@ import time
 import threading
 import queue
 
-from spintop_openhtf.plugs.comport import ComportInterface
+from spintop_openhtf.plugs import ComportInterface
 
 class FakeSerial(object):
     def __init__(self):
@@ -57,3 +57,34 @@ def test_receive_immediate_eol(fake_serial, comport):
     # no wait now (only enough time for the thread to call read)
     fake_serial.was_read.wait()
     assert comport.next_line(timeout=0.1) == 'Hello\n'
+
+def test_multi_lines(fake_serial, comport):
+    fake_serial.was_read.clear()
+    LINES = ('0\n', '1\n', '2\n')
+
+    for line in LINES:
+        comport.write(line)
+
+    fake_serial.was_read.wait()
+
+    for line in LINES:
+        assert comport.next_line(timeout=0.1) == line
+
+
+def test_keep_lines(fake_serial, comport):
+    comport.write('0\n')
+    comport.write('1\n')
+    comport.write('2\n')
+
+    fake_serial.was_read.wait()
+    time.sleep(0.1)
+    comport.keep_lines(1)
+
+    assert comport.next_line(timeout=0.1) == '2\n'
+
+def test_clear(fake_serial, comport):
+    comport.write('0\n')
+    comport.clear_lines()
+
+    assert comport.next_line(timeout=0.1) is None
+
