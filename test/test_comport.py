@@ -3,7 +3,7 @@ import time
 import threading
 import queue
 
-from spintop_openhtf.plugs import ComportInterface
+from spintop_openhtf.plugs import ComportInterface, IOTargetTimeout
 
 class FakeSerial(object):
     def __init__(self):
@@ -88,3 +88,18 @@ def test_clear(fake_serial, comport):
 
     assert comport.next_line(timeout=0.1) is None
 
+def test_message_target(fake_serial, comport):
+    def write_future():
+        for i in (1,2,3):
+            time.sleep(0.2)
+            comport.write('line%d' % i)
+    
+    thread = threading.Thread(target=write_future)
+    thread.start()
+    response = comport.message_target('hello\n', 'line3')
+
+    assert response == 'hello\nline1line2line3'
+    
+def test_message_target_timeout(fake_serial, comport):
+    with pytest.raises(IOTargetTimeout):
+        response = comport.message_target('hello\n', 'line3', timeout=0.2)

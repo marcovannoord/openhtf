@@ -1,10 +1,16 @@
 import time
-
 import threading
 from queue import Queue, Empty
 from asyncio import Protocol
 
-class IOInterface(Protocol):
+from io import StringIO
+
+from ..base import UnboundPlug
+
+class IOTargetTimeout(Exception):
+    pass
+
+class IOInterface(UnboundPlug, Protocol):
     """An interface to a read/write interface.
     
     Allows reading and writing. A background thread reads any data that comes in 
@@ -13,6 +19,7 @@ class IOInterface(Protocol):
     """
 
     def __init__(self):
+        super().__init__()
         self._line_buffer = ""
         self._read_lines = Queue()
         self._timeout_timer = None
@@ -24,6 +31,7 @@ class IOInterface(Protocol):
     def tearDown(self):
         """Tear down the plug instance."""
         self.close()
+        self.logger.close_log()
 
     def open(self, *args, **kwargs):
         raise NotImplementedError()
@@ -33,6 +41,10 @@ class IOInterface(Protocol):
 
     def write(self, string):
         """Write the string into the io interface."""
+        self.logger.debug("> {!r}".format(string))
+        return self._write(string)
+
+    def _write(self, string):
         raise NotImplementedError()
 
     def data_received(self, data):
@@ -66,6 +78,7 @@ class IOInterface(Protocol):
                     line = line + self.eol
 
                 if line:
+                    self.logger.debug(line)
                     self._read_lines.put(line)
 
     def no_data_received(self):
@@ -106,3 +119,57 @@ class IOInterface(Protocol):
 
     def eof_received(self):
         pass
+
+    
+    def message_target(self, message, target, timeout=None, keeplines=0, _timeout_raises=True):
+        """Sends the message string and waits for any string in target to be received. 
+        
+        Parameters:
+            message: The string to write into the io interface
+            target: A string or a list of string to check for in the read lines.
+            timeout: (default=None, no timeout) Wait up to this seconds for the targets. If busted, this will raise a IOTargetTimeout.
+            keeplines: (default=0, discard all) Before sending the message, call self.keep_lines with this value.
+            _timeout_raises: (default=True) If True, a timeout will raise an error.
+        """
+        self.keep_lines(keeplines)
+        self.write(message)
+
+        if isinstance(target, str):
+            targets = [target]
+        else:
+            targets = target
+
+        start_time = time.time()
+        target_found = None
+        contentstring = StringIO()
+
+        while not target_found and (timeout is None or time.time() - start_time < timeout):
+            line = self.next_line()
+            contentstring.write(line)
+            for targetstr in targets:
+                if targetstr in line:
+                    target_found = targetstr
+                    break
+
+        if target_found is None:
+            log_message = 'Message Target: timeout occured while waiting for %s' % str(targets)
+            if _timeout_raises:
+                raise IOTargetTimeout(log_message)
+        else:
+            log_message = 'Message Target: Found %s' % target_found
+
+        contentlog = contentstring.getvalue()
+        contentstring.close()
+
+        return contentlog
+    
+    def execute_command(self, command=None, timeout=None, target=None):
+        """Adds the self.eol to command and call message_target using either
+        target as target or self._target if defined. This is used for executing
+        commands in a shell-like environment and to wait for the prompt.
+        self._target or target should be the expected prompt."""
+        if target is None:
+            target = getattr(self, '_target', '$')
+        command = command + self.eol
+        return_value = self.message_target(command, target, timeout)
+        return return_value
