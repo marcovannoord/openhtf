@@ -220,6 +220,7 @@ class TestPlan(TestSequence):
         return self.run(launch_browser=launch_browser, once=True)
     
     def run(self, launch_browser=True, once=False):
+        self._load_default_conf()
         with self._station_server_context(launch_browser):
             while True:
                 try:
@@ -245,10 +246,12 @@ class TestPlan(TestSequence):
             
             yield
     
+    def _load_default_conf(self):
+        conf.load_from_dict(self.DEFAULT_CONF, _override=False)
+
     def _create_execute_test(self):
         self.assert_runnable()
         
-        conf.load_from_dict(self.DEFAULT_CONF, _override=False)
         test = Test(self.phase_group, test_name=self.name, _code_info_after_file=__file__)
         test.configure(failure_exceptions=self.failure_exceptions)
         test.add_output_callbacks(*self.callbacks)

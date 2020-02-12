@@ -5,11 +5,11 @@ import os
 import time
 import random
 
-from spintop_openhtf import TestPlan
+from spintop_openhtf import TestPlan, PhaseResult
 
 import openhtf as htf
 
-from openhtf.plugs.user_input import UserInput, PromptType
+from openhtf.plugs.user_input import UserInput, PromptType, SecondaryOptionOccured
 from openhtf.util import conf
 
 """ Test Plan """
@@ -41,7 +41,7 @@ FORM_LAYOUT = {
     ]
 }
 
-spinsuite_image_url = plan.file_provider.create_url(os.path.join(HERE, 'spinsuite-2.png'))
+spinsuite_image_url = plan.file_provider.create_url(os.path.join(HERE, 'spinhub-app-icon.png'))
 
 @plan.testcase('Hello-World')
 @htf.plugs.plug(prompts=UserInput)
@@ -53,11 +53,13 @@ def hello_world(state, prompts):
     
 Welcome to the **hello world** test.
     """
-    
-    prompts.prompt_form(FORM_LAYOUT)
-    prompts.prompt('Cancel', prompt_type=PromptType.OKAY_CANCEL)
-    prompts.prompt('PASS', prompt_type=PromptType.PASS_FAIL)
-    
+    try:
+        prompts.prompt_form(FORM_LAYOUT, prompt_type=PromptType.PASS_FAIL)
+        prompts.prompt('Cancel', prompt_type=PromptType.OKAY_CANCEL)
+        prompts.prompt('PASS', prompt_type=PromptType.PASS_FAIL)
+    except SecondaryOptionOccured:
+        return PhaseResult.FAIL_AND_CONTINUE 
+        
     state.logger.info('Hello World')
     prompts.prompt("""
 # {url}

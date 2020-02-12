@@ -239,11 +239,11 @@ class ConsolePrompt(threading.Thread):
           return
 
 
-def prompt_type_console_message(message, options=[]):
+def prompt_type_console_message(options=[]):
   if len(options) <= 1:
-    return message
+    return "Press enter to continue."
   else:
-    return message + ". Select one of the following option: " + " or ".join(opt.key for opt in options)
+    return "Select one of the following option: " + " or ".join(opt.key for opt in options)
   
 def prompt_options(prompt_type):
   if prompt_type in PROMPT_TO_OPTIONS:
@@ -298,9 +298,9 @@ class UserInput(plugs.FrontendAwareBasePlug):
         self._console_prompt.Stop()
       self.notify_update()
 
-  def prompt_form(self, json_schema_form, timeout_s=None):
+  def prompt_form(self, json_schema_form, prompt_type=PromptType.OKAY, timeout_s=None):
     message = json_schema_form
-    return self.prompt(message, prompt_type=PromptType.FORM, timeout_s=timeout_s)
+    return self.prompt(message, prompt_type=prompt_type, timeout_s=timeout_s)
     
   def prompt(self, message, prompt_type=PromptType.OKAY, text_input=False, cli_color='', timeout_s=None):
     """Display a prompt and wait for a response.
@@ -368,7 +368,7 @@ class UserInput(plugs.FrontendAwareBasePlug):
       self._options = prompt_options(prompt_type)
       self._prompt_type = prompt_type
       if sys.stdin.isatty():
-        console_message = prompt_type_console_message(message, options=self._options)
+        console_message = str(message) + ', ' + prompt_type_console_message(options=self._options)
         
         if self._console_prompt and self._console_prompt.is_alive():
           # Console prompt still active; replacing callback with new prompt.
