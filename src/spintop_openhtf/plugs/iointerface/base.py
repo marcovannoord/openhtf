@@ -100,9 +100,7 @@ class IOInterface(UnboundPlug, Protocol):
             self.clear_lines()
         else:
             current_lines = self._read_lines.qsize()
-            print(current_lines)
             while current_lines > lines_to_keep:
-                print(self.next_line())
                 current_lines = current_lines - 1
         
     def clear_lines(self):
