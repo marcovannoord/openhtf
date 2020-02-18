@@ -51,7 +51,7 @@ class TestSequence(object):
         self._teardown_phases = []
         self.name = name
     
-    def setup(self, name):
+    def setup(self, name, **options):
         """Decorator factory for a setup function.
         
         ```python
@@ -63,17 +63,17 @@ class TestSequence(object):
         
         ```
         """
-        return self._decorate_phase(name, self._setup_phases)
+        return self._decorate_phase(name, self._setup_phases, options)
     
-    def testcase(self, name):
+    def testcase(self, name, **options):
         """Decorator factory for a normal phase. 
         """
-        return self._decorate_phase(name, self._test_phases)
+        return self._decorate_phase(name, self._test_phases, options)
     
-    def teardown(self, name):
+    def teardown(self, name, **options):
         """Decorator factory for a teardown phase. 
         """
-        return self._decorate_phase(name, self._teardown_phases)
+        return self._decorate_phase(name, self._teardown_phases, options)
     
     def plug(self, *args, **kwargs):
         """Helper method: shortcut to htf.plugs.plug(...)"""
@@ -106,16 +106,18 @@ class TestSequence(object):
     def append(self, phase):
         self._test_phases.append(phase)
         
-    def _decorate_phase(self, name, array):
+    def _decorate_phase(self, name, array, options=None):
+        if not options:
+            options = {}
+        options['name'] = name
         def _note_fn(fn):
-            phase = self._add_phase(fn, name, array)
+            phase = self._add_phase(fn, array, options)
             return phase
         return _note_fn
     
-    def _add_phase(self, fn, name, array):
+    def _add_phase(self, fn, array, options):
         phase = ensure_htf_phase(fn)
-        phase.options.name = name
-        # phase.extra_kwargs['testplan'] = self
+        phase.options.update(**options)
         array.append(phase)
         return phase
         
@@ -185,7 +187,7 @@ class TestPlan(TestSequence):
     def image_url(self, url):
         return self.file_provider.create_url(url)
     
-    def trigger(self, name):
+    def trigger(self, name, **options):
         """Decorator factory for the trigger phase. 
         
         Similar to `testcase`, except that this function will be used as the test trigger.
@@ -196,7 +198,7 @@ class TestPlan(TestSequence):
         if self.trigger_phase:
             raise TestPlanError('There can only be one @trigger function.')
         
-        return self._decorate_phase(name, self._trigger_phases)
+        return self._decorate_phase(name, self._trigger_phases, options)
 
     def no_trigger(self):
         self._no_trigger = True

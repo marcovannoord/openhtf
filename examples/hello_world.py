@@ -76,10 +76,11 @@ Please tell me more.
 def hello_world(test, prompts):
     """Says Hello World 2 !"""
     test.logger.info('Hello World 2')
+    test.state['skip'] = True
 
 sub_group = plan.sub_sequence('sub-group')
 
-@sub_group.testcase('sub Hello')
+@sub_group.testcase('sub Hello', run_if=lambda state: not state.get('skip', False))
 def hello_world(test):
     """Says Sub hello."""
     test.logger.info('Sub hello')

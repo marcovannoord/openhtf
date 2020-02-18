@@ -118,6 +118,17 @@ class PhaseOptions(mutablerecords.Record('PhaseOptions', [], {
       if value is not None:
         setattr(phase.options, attr, value)
     return phase
+  
+  def call_run_if(self, user_defined_state):
+    if self.run_if:
+      arg_info = functions.getargspec(self.run_if)
+      if arg_info.args:
+        return self.run_if(user_defined_state)
+      else:
+        return self.run_if()
+    else:
+      return True
+    
 
 TestPhase = PhaseOptions
 

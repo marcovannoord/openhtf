@@ -751,7 +751,8 @@ class PhaseExecutorTest(unittest.TestCase):
         spec=test_state.TestState,
         plug_manager=plugs.PlugManager(),
         execution_uid='01234567890',
-        state_logger=mock.MagicMock())
+        state_logger=mock.MagicMock(),
+        user_defined_state={})
     self.test_state.plug_manager.initialize_plugs([
         UnittestPlug, MoreRepeatsUnittestPlug])
     self.phase_executor = phase_executor.PhaseExecutor(self.test_state)

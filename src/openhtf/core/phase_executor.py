@@ -237,7 +237,7 @@ class PhaseExecutor(object):
   def _execute_phase_once(self, phase_desc, is_last_repeat):
     """Executes the given phase, returning a PhaseExecutionOutcome."""
     # Check this before we create a PhaseState and PhaseRecord.
-    if phase_desc.options.run_if and not phase_desc.options.run_if():
+    if not phase_desc.options.call_run_if(self.test_state.user_defined_state):
       _LOG.debug('Phase %s skipped due to run_if returning falsey.',
                  phase_desc.name)
       return PhaseExecutionOutcome(openhtf.PhaseResult.SKIP)
