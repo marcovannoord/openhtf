@@ -81,6 +81,18 @@ def test_keep_lines(fake_serial, comport):
     comport.keep_lines(1)
 
     assert comport.next_line(timeout=0.1) == '2\n'
+    
+
+def test_keep_lines_0(fake_serial, comport):
+    comport.write('0\n')
+    comport.write('1\n')
+    comport.write('2\n')
+
+    fake_serial.was_read.wait()
+    time.sleep(0.1)
+    comport.keep_lines(0)
+
+    assert comport.next_line(timeout=0.1) is None
 
 def test_clear(fake_serial, comport):
     comport.write('0\n')

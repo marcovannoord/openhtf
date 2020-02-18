@@ -96,12 +96,11 @@ class IOInterface(UnboundPlug, Protocol):
 
     def keep_lines(self, lines_to_keep):
         """Clear all lines in the buffer except the last lines_to_keep lines."""
-        if lines_to_keep == 0:
-            self.clear_lines()
-        else:
+        current_lines = self._read_lines.qsize()
+        while current_lines > lines_to_keep:
+            current_lines = current_lines - 1
+            self.next_line()
             current_lines = self._read_lines.qsize()
-            while current_lines > lines_to_keep:
-                current_lines = current_lines - 1
         
     def clear_lines(self):
         """Clear all lines in the buffer."""
