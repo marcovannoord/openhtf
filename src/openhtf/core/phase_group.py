@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Modified by Tack Verification, 2020
+
 """Phase Groups in OpenHTF.
 
 Phase Groups are collections of Phases that are used to control phase

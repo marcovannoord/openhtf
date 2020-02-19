@@ -7,7 +7,7 @@ from openhtf.core.test_descriptor import create_arg_parser
 
 def spintop_create_arg_parser(add_help=False):
     parser = argparse.ArgumentParser(
-          'Spintop - The extension to OpenHTF', parents=[create_arg_parser()],
+          'Spintop OpenHTF - The extension to OpenHTF', parents=[create_arg_parser()],
           add_help=add_help)
     parser.add_argument(
         '--coverage', action='store_true',

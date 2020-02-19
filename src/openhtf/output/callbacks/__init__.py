@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Modified by Tack Verification, 2020
+
 """This module contains support for various built-in output mechanisms.
 
 Here, a base OutputToFile class is implemented to provide simple output to
