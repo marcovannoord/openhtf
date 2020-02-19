@@ -75,8 +75,6 @@ setup(
         'PyYAML>=5.0',
         'pyOpenSSL>=17.1.0,<18.0',
         'SheetFu>=1.4.1',
-        'pyserial>=3.3.0,<4.0',
-        'paramiko',
         'jsonschema>=3.0.2',
         'markdown2>=2.3.8'
     ],
@@ -84,6 +82,15 @@ setup(
         'server':[ # Allows the different GUI servers. Can still run without GUI.
             'tornado>=4.3,<5.0', 
             'sockjs-tornado>=1.0.3,<2.0',
+        ],
+        'plugs.comport':[
+            'pyserial>=3.3.0,<4.0',
+        ],
+        'plugs.ssh':[
+            'paramiko',
+        ],
+        'plugs.visa':[
+            'pyvisa',
         ]
     },
     setup_requires=[
