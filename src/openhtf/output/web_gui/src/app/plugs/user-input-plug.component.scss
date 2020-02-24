@@ -19,3 +19,23 @@
   color: $theme-red;
   font-size: $font-size-small;
 }
+
+.user-input-button-container {
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;    
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.user-input-button-warning {
+  background-color: $theme-yellow; //#ffb10082;
+}
+
+.user-input-button-error {
+  background-color: $theme-red; // #ff00009c;
+}
+
+.user-input-button-success {
+  background-color: $theme-green; //#09940082;
+}

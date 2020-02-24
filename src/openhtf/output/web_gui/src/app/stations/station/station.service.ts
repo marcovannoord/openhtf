@@ -184,6 +184,7 @@ export class StationService extends Subscription {
               })
               .catch(error => {
                 const tooltip = messageFromErrorResponse(error);
+                console.error(error);
                 this.flashMessage.error(
                     'HTTP request for phase descriptors failed.', tooltip);
                 return Promise.reject(error);

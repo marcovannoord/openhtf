@@ -16,18 +16,31 @@ export enum PhaseStatus {
   fail,
 }
 
+export class PhaseRunOptions {
+  type: string;
+  depth: number;
+}
+
 export class Phase {
   attachments: Attachment[];
   descriptorId: number;
+  runOptions: PhaseRunOptions|null;
   endTimeMillis: number|null;
   name: string;
+  doc: string;
+  docExtended: string|null;
   measurements: Measurement[];
   status: PhaseStatus;
   startTimeMillis: number|null;  // Should only be null if phase is waiting.
 
   // Using the class as the interface for its own constructor allows us to call
   // the constructor in named-argument style.
-  constructor(params: Phase) {
+  constructor(params) {
+    var docLines;
+    if (params.doc) docLines = params.doc.split("\n");
+    else docLines = []
+    params.doc = docLines.length > 0 ? docLines[0] : '';
+    params.docExtended = docLines.slice(1).join("\n");
     Object.assign(this, params);
   }
 }

@@ -6,13 +6,9 @@ from tornado import web, iostream
 from openhtf.output.servers.station_server import StationServer as HTFStationServer
 from .file_provider import TEMPFILES_PATH
 
-
-WEB_GUI = os.path.join(os.path.dirname(__file__), 'web_gui')
-STATIC_FILES_ROOT = os.path.join(WEB_GUI, 'dist')
-
 class StationServer(HTFStationServer):
     def __init__(self, file_provider, *args, **kwargs):
-        super(StationServer, self).__init__(*args, static_files_root=STATIC_FILES_ROOT, **kwargs)
+        super(StationServer, self).__init__(*args, **kwargs)
         
         self.file_provider = file_provider
         

@@ -4,6 +4,13 @@
   border-bottom: 1px solid $border-light-grey;
 }
 
+.doc-extended {
+  padding: 10px;
+}
+
+.teardown-phase {
+}
+
 .measurement-list {
   border-collapse: separate;
   border-right: 100px solid rgba($theme-dark-grey, .1);;

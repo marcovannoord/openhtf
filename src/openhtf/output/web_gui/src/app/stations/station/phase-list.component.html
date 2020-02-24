@@ -12,9 +12,10 @@
   </div>
 
   <ul class="htf-layout-widget-list">
-    <li *ngFor="let phase of test.phases">
+    <li *ngFor="let phase of test.phases" >
       <htf-phase
         [phase]="phase"
+        [expandIfRunning]="false"
         [expand]="showMeasurements">
       </htf-phase>
     </li>
