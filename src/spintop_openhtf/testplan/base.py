@@ -20,7 +20,7 @@ from ..callbacks.local_storage import LocalStorageOutput
 
 
 try:
-    import tornado
+    import tornado, sockjs
 except ImportError:
     warnings.warn(
         'Tornado not available. GUI server will not work. '
