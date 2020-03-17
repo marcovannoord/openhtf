@@ -66,15 +66,16 @@ class UnboundPlug(object):
 
 
 def plug_factory(plug_cls, name, **kwargs_values):
+
+    for key, value in kwargs_values.items():
+        if isinstance(value, from_conf):
+            value.declare()
+            
     def resolve(value):
         if isinstance(value, from_conf):
             return value.resolve()
         else:
             return value
-
-    for key, value in kwargs_values.items():
-        if isinstance(value, from_conf):
-            value.declare()
 
 
     class _AnonymousPlug(plugs.BasePlug, plug_cls):

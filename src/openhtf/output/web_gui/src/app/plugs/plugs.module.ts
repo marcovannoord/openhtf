@@ -14,12 +14,18 @@ import { SharedModule } from '../shared/shared.module';
 
 import { UserInputPlugComponent } from './user-input-plug.component';
 
+import {
+  JsonSchemaFormModule, Bootstrap3FrameworkModule
+} from 'angular2-json-schema-form';
+
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     HttpModule,
     SharedModule,
+    Bootstrap3FrameworkModule,
+    JsonSchemaFormModule.forRoot(Bootstrap3FrameworkModule)
   ],
   declarations: [
     UserInputPlugComponent,

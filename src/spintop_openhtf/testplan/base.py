@@ -7,6 +7,8 @@ import warnings
 from copy import copy
 from contextlib import contextmanager
 
+import pkg_resources
+
 import openhtf as htf
 
 from openhtf.util import conf
@@ -21,9 +23,13 @@ from ..callbacks.local_storage import LocalStorageOutput
 
 try:
     import tornado, sockjs
-except ImportError:
+    tornado_version = pkg_resources.get_distribution("tornado").version
+    major, *rest = tornado_version.split('.')
+    if int(major) > 4:
+        raise ValueError('Tornado version must be <= 4.x.x')
+except (ImportError, ValueError):
     warnings.warn(
-        'Tornado not available. GUI server will not work. '
+        'Tornado 4.x.x not available. GUI server will not work. '
         'If you wish to install it, you may install spintop-openhtf '
         'with the [server] dependency, such as '
         'pip install spintop-openhtf[server]. Do note that this requires '

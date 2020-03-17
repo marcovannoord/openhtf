@@ -146,3 +146,15 @@
     width: 0;
   }
 }
+
+.form-group {
+  margin: 10px;
+}
+
+.control-label {
+  font-style: italic;
+}
+
+.text-danger {
+  color: $theme-red;
+}

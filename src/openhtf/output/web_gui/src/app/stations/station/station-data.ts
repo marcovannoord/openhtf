@@ -75,7 +75,9 @@ export interface RawPhase {
   descriptor_id: number;
   end_time_millis?: number;
   measurements: {[name: string]: RawMeasurement};
+  run_options: object;
   name: string;
+  doc?: string;
   result?: {};  // Not present on running phase state.
   start_time_millis: number;
 }
@@ -95,6 +97,8 @@ export interface RawMeasurement {
 export interface RawPhaseDescriptor {
   id: number;
   name: string;
+  doc: string;
+  run_options: object;
   measurements: RawMeasurement[];
 }
 
@@ -214,6 +218,8 @@ function makePhase(phase: RawPhase, running: boolean) {
     descriptorId: phase.descriptor_id,
     endTimeMillis: phase.end_time_millis || null,
     name: phase.name,
+    runOptions: phase.run_options,
+    doc: phase.codeinfo['docstring'],
     startTimeMillis: phase.start_time_millis,
     status,
     measurements,
@@ -226,6 +232,8 @@ export function makePhaseFromDescriptor(descriptor: RawPhaseDescriptor) {
     descriptorId: descriptor.id,
     endTimeMillis: null,
     name: descriptor.name,
+    doc: descriptor.doc,
+    runOptions: descriptor.run_options,
     startTimeMillis: null,
     status: PhaseStatus.waiting,
     measurements: descriptor.measurements.map(measurement => {

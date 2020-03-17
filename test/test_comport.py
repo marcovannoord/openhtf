@@ -3,7 +3,7 @@ import time
 import threading
 import queue
 
-from spintop_openhtf.plugs import ComportInterface, IOTargetTimeout
+from spintop_openhtf.plugs.comport import ComportInterface, IOTargetTimeout
 
 class FakeSerial(object):
     def __init__(self):
