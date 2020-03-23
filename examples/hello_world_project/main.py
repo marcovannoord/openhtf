@@ -62,5 +62,4 @@ def greet_tester(test, greet):
     greet.greet_tester()
 
 if __name__ == '__main__':
-    conf.load(station_server_port='4444', capture_docstring=True)
     plan.run()

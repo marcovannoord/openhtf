@@ -24,8 +24,6 @@ if not compiled_proto_files:
 # openhtf_packages = ['openhtf'] + ['openhtf.' + pack for pack in find_packages(where='openhtf/openhtf')]
 packages =  find_packages('src')
 
-print(packages)
-
 setup(
     name='spintop-openhtf',
     version=VERSION,

@@ -1,7 +1,8 @@
 import paramiko
 import socket
 import time
-from collections import Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
 
 from .base import UnboundPlug
 
@@ -17,6 +18,16 @@ def ssh_client_connected(function):
         return function(*args, **kwargs)
 
     return check_connected
+
+@dataclass()
+class SSHResponse():
+    exit_code: str
+    err_output: str
+    std_output: str
+    
+    @property
+    def output(self):
+        return self.err_output + '\n' + self.std_output
 
 class SSHInterface(UnboundPlug):
     def __init__(self, addr, username, password, create_timeout=3, port=22):
@@ -51,7 +62,7 @@ class SSHInterface(UnboundPlug):
         self.ssh.close()
 
     @ssh_client_connected
-    def execute_command(self, command, timeout=60, stdin=[], get_pty=False, assertexitcode=0):
+    def execute_command(self, command, timeout=60, stdin=[], get_pty=False, assertexitcode=0, return_resp_obj=False):
         output = ""
         err_output = ""
         exit_code = 0
@@ -85,14 +96,18 @@ class SSHInterface(UnboundPlug):
             self.logger.debug("(Exit code={}, Response:)\n{}".format(exit_code, output.strip()))
             if err_output != '':
                 self.logger.debug("(STDERR:)\n{}".format(err_output.strip()))
-
-
         else:
             pass
-        output = err_output + '\n' + output
+        
         if assertexitcode is not None:
             assert_exit_code(exit_code, expected=assertexitcode)
-        return output
+
+        response = SSHResponse(exit_code=exit_code, err_output=err_output, std_output=output)
+
+        if return_resp_obj:
+            return response
+        else:
+            return response.output
 
     def wait_stdout_with_timeout(self, stdout, timeout_seconds):
         start_time = time.time()
