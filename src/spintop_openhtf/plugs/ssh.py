@@ -83,10 +83,7 @@ class SSHInterface(UnboundPlug):
             except socket.timeout:
                 self.logger.info("(SSH TIMEOUT REACHED)")
             finally:
-                if(ssh_stdout.channel.exit_status_ready()):
-                    exit_code = ssh_stdout.channel.recv_exit_status()
-                else:
-                    exit_code = 0
+                exit_code = ssh_stdout.channel.recv_exit_status()
                 ssh_stdout.channel.close()
                 ssh_stderr.channel.close()
                 output = ssh_stdout.read().decode('utf-8', 'ignore')
