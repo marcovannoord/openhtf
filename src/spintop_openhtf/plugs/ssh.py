@@ -65,10 +65,10 @@ class SSHInterface(UnboundPlug):
     def execute_command(self, command, timeout=60, stdin=[], get_pty=False, assertexitcode=0, return_resp_obj=False):
         output = ""
         err_output = ""
-        exit_code = 0
+        exit_code = None
         if command != "":
             self.logger.info("(Timeout %.1fs, TTY=%s)" % (timeout, str(get_pty)))
-            ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command(command, timeout=timeout, get_pty=get_pty)
+            ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command(command, get_pty=get_pty)
     
             self.logger.debug("> {!r}".format(command))
             for stdin_element in stdin:
@@ -80,10 +80,8 @@ class SSHInterface(UnboundPlug):
 
             try:
                 self.wait_stdout_with_timeout(ssh_stdout, timeout)
-            except socket.timeout:
-                self.logger.info("(SSH TIMEOUT REACHED)")
-            finally:
                 exit_code = ssh_stdout.channel.recv_exit_status()
+            finally:
                 ssh_stdout.channel.close()
                 ssh_stderr.channel.close()
                 output = ssh_stdout.read().decode('utf-8', 'ignore')
@@ -113,7 +111,7 @@ class SSHInterface(UnboundPlug):
                 break
             time.sleep(0)
         else:
-            self.logger.info("COMMAND TIMEOUT REACHED")
+            raise SSHError(f'Client command timeout reached ({timeout_seconds}s)')
 
 
 def assert_exit_code(exit_code, expected):
