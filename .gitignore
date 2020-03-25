@@ -24,7 +24,6 @@ var/
 *.egg
 
 # Python Sphinx build
-_static/
 _build/
 
 # Coverage output
