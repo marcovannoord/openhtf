@@ -23,6 +23,10 @@ var/
 .installed.cfg
 *.egg
 
+# Python Sphinx build
+_static/
+_build/
+
 # Coverage output
 htmlcov/
 

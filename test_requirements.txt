@@ -2,3 +2,5 @@ spintop==0.7.0b3
 pandas
 pytest
 mock
+sphinx
+recommonmark
