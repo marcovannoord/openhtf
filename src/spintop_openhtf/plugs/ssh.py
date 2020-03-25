@@ -1,6 +1,10 @@
 import paramiko
 import socket
 import time
+
+import typing
+
+from functools import wraps
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -12,17 +16,8 @@ class SSHError(Exception):
 class SSHTimeoutError(SSHError):
     pass
 
-@dataclass()
-class SSHResponse():
-    exit_code: str
-    err_output: str
-    std_output: str
-    
-    @property
-    def output(self):
-        return self.err_output + '\n' + self.std_output
-
 def _ssh_client_connected(function):
+    @wraps(function)
     def check_connected(*args, **kwargs):
         _self = args[0]
         if not _self.is_connected():
@@ -33,6 +28,19 @@ def _ssh_client_connected(function):
     return check_connected
 
 class SSHInterface(UnboundPlug):
+    """ An interface to an SSH Server.
+    """
+    @dataclass()
+    class SSHResponse():
+        exit_code: int #: The command exit code
+        err_output: str #: The command stderr output
+        std_output: str #: The command stdout output
+        
+        @property
+        def output(self):
+            """Combines both the err output and the std_output."""
+            return self.err_output + '\n' + self.std_output
+
     def __init__(self, addr, username, password, create_timeout=3, port=22):
         super().__init__()
         self.ssh = None
@@ -67,7 +75,31 @@ class SSHInterface(UnboundPlug):
         self.ssh.close()
 
     @_ssh_client_connected
-    def execute_command(self, command, timeout=60, stdin=[], get_pty=False, assertexitcode=0):
+    def execute_command(self, 
+            command:str, 
+            timeout:float=60, 
+            stdin:typing.List=[], 
+            get_pty:bool=False, 
+            assertexitcode:typing.Union[typing.List[int], int, None]=0
+        ):
+        """ Send a :obj:`command` and wait for it to execute.
+
+        Args:
+            command: The command to send. End of lines are automatically managed. For example execute_command('ls')
+                will executed the ls command.
+            timeout: The timeout in second to wait for the command to finish executing.
+            stdin: A list of inputs to send into stdin after the command is started. Each entry in this list will
+                be separated with an r'\\n' character.
+            get_pty: Usually required when providing :obj:`stdin`.
+            assertexitcode: Unless this is None, defines one or a list of exit codes that are expected. After the 
+                command is executed, an :class:`SSHError` will be raised if the exit code is not as expected.
+
+        Raises:
+            SSHTimeoutError:
+                Raised when :obj:`timeout` is reached.
+            SSHError:
+                Raised when the exit code of the command is not in :obj:`assertexitcode` and :obj:`assertexitcode` is not None.
+        """
         output = ""
         err_output = ""
         exit_code = None
@@ -102,7 +134,7 @@ class SSHInterface(UnboundPlug):
         if assertexitcode is not None:
             assert_exit_code(exit_code, expected=assertexitcode)
 
-        response = SSHResponse(exit_code=exit_code, err_output=err_output, std_output=output)
+        response = self.SSHResponse(exit_code=exit_code, err_output=err_output, std_output=output)
 
         return response
     

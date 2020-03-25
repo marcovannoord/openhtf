@@ -10,11 +10,6 @@ Welcome to Spintop OpenHTF's documentation!
    :maxdepth: 2
    :caption: Contents:
    
-   docs/getting-started
-   docs/project-structure
-   docs/custom-forms
-   docs/test-sequencing
-   docs/plugs
    docs/ref
 
 
