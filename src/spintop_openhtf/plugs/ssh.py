@@ -42,11 +42,13 @@ class SSHInterface(UnboundPlug):
         self.create_timeout = create_timeout
         self.port = port
 
-    def open(self):
+    def open(self, _client=None):
         self.logger.info("(Initiating SSH connection at %s)", self.addr)
         self.logger.info("(addr={}:{}, user={!r}, password={!r})".format(self.addr, self.port, self.username, self.password))
         try:
-            self.ssh = paramiko.SSHClient()
+            # _client allows to pass in a mock for testing
+            if _client is None: _client = paramiko.SSHClient()
+            self.ssh = _client
             self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             self.ssh.connect(self.addr, port=self.port, username=self.username, password=self.password, timeout=self.create_timeout)
             self.ssh.get_transport().set_keepalive(5) #Send keepalive packet every 5 seconds
