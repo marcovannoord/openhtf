@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Add basic plugs types: Comport, SSH, VISA. The dependencies associated with each plug is installed using an extra named `plugs.comport`, `plugs.ssh`, etc. 
-- SSH Plug `execute_command` now accepts a `return_resp_obj` parameter that can be set to True to receive an object that contains the following attributes: `exit_code`, `std_output`, `err_output`, `output` (err + std output)
+- SSH Plug `execute_command` returns an object that contains the following attributes: `exit_code`, `std_output`, `err_output`, `output` (err + std output)
+- SSH Plug raises a timeout exception (SSHTimeoutError) when the client timeout is reached.
 
 ### Deprecated

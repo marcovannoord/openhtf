@@ -9,15 +9,8 @@ from .base import UnboundPlug
 class SSHError(Exception):
     pass
 
-def ssh_client_connected(function):
-    def check_connected(*args, **kwargs):
-        _self = args[0]
-        if not _self.is_connected():
-            _self.logger.info("Connection is no longer alive")
-            _self.open()
-        return function(*args, **kwargs)
-
-    return check_connected
+class SSHTimeoutError(SSHError):
+    pass
 
 @dataclass()
 class SSHResponse():
@@ -28,6 +21,16 @@ class SSHResponse():
     @property
     def output(self):
         return self.err_output + '\n' + self.std_output
+
+def _ssh_client_connected(function):
+    def check_connected(*args, **kwargs):
+        _self = args[0]
+        if not _self.is_connected():
+            _self.logger.info("Connection is dead, reopening...")
+            _self.open()
+        return function(*args, **kwargs)
+
+    return check_connected
 
 class SSHInterface(UnboundPlug):
     def __init__(self, addr, username, password, create_timeout=3, port=22):
@@ -61,8 +64,8 @@ class SSHInterface(UnboundPlug):
         self.logger.info("(Closing SSH connection)")
         self.ssh.close()
 
-    @ssh_client_connected
-    def execute_command(self, command, timeout=60, stdin=[], get_pty=False, assertexitcode=0, return_resp_obj=False):
+    @_ssh_client_connected
+    def execute_command(self, command, timeout=60, stdin=[], get_pty=False, assertexitcode=0):
         output = ""
         err_output = ""
         exit_code = None
@@ -89,7 +92,7 @@ class SSHInterface(UnboundPlug):
 
 
             self.logger.debug("(Exit code={}, Response:)\n{}".format(exit_code, output.strip()))
-            if err_output != '':
+            if err_output:
                 self.logger.debug("(STDERR:)\n{}".format(err_output.strip()))
         else:
             pass
@@ -99,11 +102,8 @@ class SSHInterface(UnboundPlug):
 
         response = SSHResponse(exit_code=exit_code, err_output=err_output, std_output=output)
 
-        if return_resp_obj:
-            return response
-        else:
-            return response.output
-
+        return response
+    
     def wait_stdout_with_timeout(self, stdout, timeout_seconds):
         start_time = time.time()
         while time.time() - start_time < timeout_seconds:
@@ -111,16 +111,15 @@ class SSHInterface(UnboundPlug):
                 break
             time.sleep(0)
         else:
-            raise SSHError(f'Client command timeout reached ({timeout_seconds}s)')
+            raise SSHTimeoutError(f'Client command timeout reached ({timeout_seconds}s)')
+
 
 
 def assert_exit_code(exit_code, expected):
     if not isinstance(expected, Sequence):
         expected = [expected]
-
-    for possible in expected:
-        if possible == exit_code:
-            return
-    else:
+        
+    if exit_code not in expected:
         raise SSHError('Exit code {} not in expected list {}'.format(exit_code, expected))
+        
 
