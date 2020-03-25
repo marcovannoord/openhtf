@@ -1,4 +1,4 @@
--e .[server, plugs.comport, plugs.ssh, plugs.visa]
+-e ".[server, plugs.comport, plugs.ssh, plugs.visa]"
 -r test_requirements.txt
 sphinx
 recommonmark
