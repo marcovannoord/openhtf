@@ -98,8 +98,8 @@ class TestSequence(object):
             def do_something(test):
                 pass
 
-    Since :class:`TestPlan`s are :class:`TestSequence`s, and sub sequences are also TestSequences,
-    they can be infinitely nested using `~TestSequence.append` and :meth:`~TestSequence.sub_sequence`.
+    Since TestPlans are TestSequences, and sub sequences are also TestSequences,
+    they can be infinitely nested using :meth:`~TestSequence.append` and :meth:`~TestSequence.sub_sequence`.
 
     Args:
         name: The name of this test node.
@@ -126,6 +126,8 @@ class TestSequence(object):
         
         A testcase function is a normal openhtf phase.
         
+        The options parameter is a proxy for the PhaseOptions arguments.
+                
         .. highlight:: python
         .. code-block:: python
         
@@ -134,14 +136,21 @@ class TestSequence(object):
             @my_sequence.testcase('my-testcase-name')
             def setup_fn(test):
                 (...)
+        
+        {phase_options_doc}
         """
         return self._decorate_phase(name, self._test_phases, options)
+    
+    # Add PhaseOptions documentation
+    testcase.__doc__ = testcase.__doc__.format(phase_options_doc=htf.PhaseOptions.__doc__)
     
     def teardown(self, name, **options):
         """Decorator factory for a teardown phase. 
 
         A teardown function will always be executed if the sequence is entered, regardless
         of the outcome of normal or setup phases.
+
+        See :meth:`~TestSequence.testcase` for usage.
         """
         return self._decorate_phase(name, self._teardown_phases, options)
     
@@ -158,16 +167,19 @@ class TestSequence(object):
         
         The following two snippets are equivalent:
         
-        ```python
-        my_sequence = TestSequence('Parent')
-        sub_sequence = my_sequence.sub_sequence('Child')
-        ```
+        .. highlight:: python
+        .. code-block:: python
         
-        ```python
-        my_sequence = TestSequence('Parent')
-        sub_sequence = TestSequence('Child')
-        my_sequence.append(sub_sequence)
-        ```
+            my_sequence = TestSequence('Parent')
+            sub_sequence = my_sequence.sub_sequence('Child')
+        
+        .. highlight:: python
+        .. code-block:: python
+        
+            my_sequence = TestSequence('Parent')
+            sub_sequence = TestSequence('Child')
+            my_sequence.append(sub_sequence)
+            
         """
         group = TestSequence(name)
         self.append(group)
