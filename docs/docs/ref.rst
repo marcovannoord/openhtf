@@ -7,6 +7,22 @@ Test Plan
 .. autoclass:: spintop_openhtf.TestSequence
     :members:
 
+Configuration
+##############
+
+Config Module
+****************
+
+.. automodule:: openhtf.util.conf
+    :members:
+
+Built-in Configuration Keys
+*****************************
+
+.. autoclass:: spintop_openhtf.testplan._default_conf.ConfigHelpText
+    :members:
+
+
 Plugs
 #########
 
