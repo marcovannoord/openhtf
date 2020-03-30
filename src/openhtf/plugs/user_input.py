@@ -35,7 +35,7 @@ import enum
 
 from openhtf import PhaseOptions
 from openhtf import plugs
-from openhtf.util import console_output
+from openhtf.util import console_output, conf
 from six.moves import input
 
 if platform.system() != 'Windows':
@@ -52,6 +52,12 @@ PromptType = enum.Enum('PromptType', [
   'PASS_FAIL',
   'PASS_FAIL_RETRY'
 ])
+
+conf.declare(
+  'user_input_enable_console', 
+  'If True, enables user input collection in console prompt.', 
+  default_value=False
+)
 
 class InvalidOption(Exception):
   def __init__(self, option):
@@ -268,7 +274,7 @@ class UserInput(plugs.FrontendAwareBasePlug):
 
   @property
   def _console_prompt(self):
-    """ Console prompt is global because it uses the only-available once stdin to capture input.
+    """ Console prompt is global because it uses the only available once stdin to capture input.
     If not global, a new test with create a new plug and any old console prompt will be left hanging.""" 
     return CONSOLE_PROMPT
 
@@ -367,7 +373,7 @@ class UserInput(plugs.FrontendAwareBasePlug):
           id=prompt_id, message=message, prompt_type=prompt_type)
       self._options = prompt_options(prompt_type)
       self._prompt_type = prompt_type
-      if sys.stdin.isatty():
+      if conf['user_input_enable_console'] and sys.stdin.isatty():
         console_message = str(message) + ', ' + prompt_type_console_message(options=self._options)
         
         if self._console_prompt and self._console_prompt.is_alive():
