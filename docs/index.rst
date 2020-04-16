@@ -11,6 +11,8 @@ Welcome to Spintop OpenHTF's documentation!
    :caption: Contents:
    
    docs/ref
+   docs/test-flow/ref
+
 
 
 Indices and tables
