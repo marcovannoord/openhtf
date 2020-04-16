@@ -30,7 +30,7 @@ master_doc = 'index'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'recommonmark',
+    'm2r',
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon'
 ]
