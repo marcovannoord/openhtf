@@ -1,14 +1,34 @@
-## Introduction
 
-.. note:: Note
-    This page illustrates how to control the flow of the test depending on a selected sub test bench.
+.. _test-flow-label:
 
-In the context of a spintop-openhtf test bench, test flow management consists in selecting the test cases to execute dynamically depending on the input of the operator during the trigger phase. A test bench can be implemented for a family of product instead of one test bench per product version. In this test bench some test cases are executed for a particular version of the product and some are shared across the product family. Test flow management allows the definition of such test benches.
+## Test Flow Management
+
+In the context of a spintop-openhtf test bench, test flow management consists in selecting the test cases to execute dynamically depending on 
+-  the input of the operator during the trigger phase,
+-  the results and outcomes of the previous test phases.
+
+A test bench can be implemented for a family of product instead of one test bench per product version. In these test benches, the DUT type selected in the trigger phase will determine which test cases are executed. For example, for a version, all test cases can be run and for another, a test is removed.  Test flow management allows the definition of such test benches.
+
+### Dynamic Test Flow Management with Phase Outcomes
+
+The outcome and result of a phase can impact the execution of the rest of the test benches. Let's first explore the concepts of phase outcomes and phase results. 
+
+#### Phase results
+
+The result of a test phase is controlled by the value it returns. The developper can determine through the test logic which result is returned. 
+
+It can return None (or no return statement) for the standard CONTINUE. If an uncatched exception occurs during the test, the phase will be marked as ERROR. OpenHTF will infer the outcome based on the test phase result.
+
+- **PhaseResult.CONTINUE**: Causes the framework to process the phase measurement outcomes and execute the next phase.
+- **PhaseResult.FAIL_AND_CONTINUE**: Causes the framework to mark the phase with a fail outcome and execute the next phase.
+- **PhaseResult.REPEAT**: Causes the framework to execute the same phase again, ignoring the measurement outcomes for this instance. 
+- **PhaseResult.SKIP**: Causes the framework to ignore the measurement outcomes and execute the next phase.
+- **PhaseResult.STOP**: Causes the framework to stop executing, indicating a failure. The next phases will not be executed.
 
 
-### Phase outcomes
+#### Phase outcomes
 
-The outcome of a test phase can be one of the following values, which is determined by the PhaseResult described further below:
+The outcome of a test phase can be one of the following values, which is determined by the PhaseResult described above:
 
 - **PhaseOutcome.PASS**: The phase result was CONTINUE and all measurements validators passed.
 - **PhaseOutcome.FAIL**:  The phase result was CONTINUE and one or more measurements outcome failed, or the phase result was FAIL_AND_CONTINUE or STOP.
@@ -19,36 +39,27 @@ Although you should not need to import this enum for test sequencing, you can im
 
 Phase outcomes are inherited through all levels by the parent phase up to the test plan itself.
 
-### Phase results
 
-The result of a test phase is controlled by the value it returns. It can return None (or no return statement) for the standard CONTINUE. If an uncatched exception occurs during the test, the phase will be marked as ERROR. OpenHTF will infer the outcome based on the test phase result.
-
-- **PhaseResult.CONTINUE**:Causes the framework to process the phase measurement outcomes and execute the next phase.
-- **PhaseResult.FAIL_AND_CONTINUE**: Causes the framework to mark the phase with a fail outcome and execute the next phase.
-- **PhaseResult.REPEAT**: Causes the framework to execute the same phase again, ignoring the measurement outcomes for this instance. 
-- **PhaseResult.SKIP**: Causes the framework to ignore the measurement outcomes and execute the next phase.
-- **PhaseResult.STOP**: Causes the framework to stop executing, indicating a failure. The next phases will not be executed.
-
-### Difference between outcome and result
+#### Difference between outcome and result
 
 Simply put, 
-- the phase outcome determines if the phase has failed or passed, and if propagated to all parent phases. 
+- the phase outcome determines if the phase has failed or passed, and is propagated to all parent phases. 
 - the phase result first creates the phase outcome and then dictates the remaining test flow. 
 
 The phase results impact on the test flow is discussed and examplified in details below. 
 
 
-## Managing the Test Flow Based on Phase Results
+### Managing the Test Flow Based on Phase Results
 
 The phase results can be used by the test bench developper to manipulate the flow of the test bench based on intermediary results. 
 
-### PhaseResult.STOP
+#### PhaseResult.STOP
 
 The **PhaseResult.STOP** result can be imposed by the developper in the case of the failure of a critical test. Tests are critical when continuing the test after a failure could be dangerous for the unit under test and the test bench. The developper could also decide to terminate the test on a failure when continuing would be a waste of time. The flow management based on phase results allows the termination of the test bench on such a critical phase failure. 
 
-### PhaseResult.FAIL_AND_CONTINUE
+#### PhaseResult.FAIL_AND_CONTINUE
 
-The **PhaseResult.FAIL_AND_CONTINUE** result is used to mark a phase as failed when no other element of the test would indicate it (criteria or exceptions). The developper uses it as the return code 
+The **PhaseResult.FAIL_AND_CONTINUE** result is used to mark a phase as failed when no other element of the test would indicate it (criteria or exceptions). The developper uses it as the return code.
 
 As an example, it is decided to return a failure in product "B" is selected in the trigger phase. 
 
@@ -65,13 +76,13 @@ def sleep_test(test):
         return PhaseResult.FAIL_AND_CONTINUE
 ```     
 
-### PhaseResult.REPEAT
+#### PhaseResult.REPEAT
 
-The **PhaseResult.REPEAT** result can be used to retry non-critical tests. Some tests can be retried until they pass (with a maximum retry number), without endangering the quality of the product. For example is a calibration algorithm that converges through multiple tries. 
+The **PhaseResult.REPEAT** result can be used to retry non-critical tests. Some tests can be retried until they pass (with a maximum retry number), without endangering the quality of the product. For example a calibration algorithm that converges through multiple tries. 
 
 In the case the developper requires a repeat of the test for it to converge to a PASS, the return code is used. The *repeat_limit* option is used to limit the number of retries. If the **PhaseResult.REPEAT** is returned once more  than the phase's *`*repeat_limit*, this will be treated as a **PhaseResult.STOP**.
 
-As an example, we create a test which generates a random number between 1-10 and declares a PASS if the result is 8 or higher. The test will fail 70% of the time, but will be repeated until it passes, if the PASS appears within 5 retries
+As an example, we create a test which generates a random number between 1-10 and declares a PASS if the result is 8 or higher. The test will fail 70% of the time, but will be repeated until it passes, if the PASS appears within 5 retries.
 
 ```python
 from openhtf import PhaseResult
@@ -88,7 +99,7 @@ def random_test(test, repeat_limit = 5):
         return PhaseResult.REPEAT
 ```     
 
-The following is an excerpt of a log of a 5 retrie test
+The following is an excerpt of a log of a 5 retries test
 
 ```bat
 Handling phase Random
@@ -114,10 +125,7 @@ Thread finished: <PhaseExecutorThread: (Random)>
 Phase Random finished with result PhaseResult.CONTINUE
 ```
 
-You can import this enum using `from openhtf import PhaseResult`.
-
-
-### PhaseResult.SKIP
+#### PhaseResult.SKIP
 
 The **PhaseResult.SKIP** result can be used by the developper to ignore a phase, depending on what goes on inside. Let's merge our last two examples, to create a test where, if product "A" is entered, the random test is executed and logged, and if product "B" is entered, the random test is executed but its result is ignored. No repeats are allowed.
 
@@ -127,7 +135,9 @@ from openhtf import PhaseResult
 import random
 @plan.testcase('Random')
 def random_test(test):
-    """Generate a random number between 1 and 10. If number is 8, 9, or 10 it is a PASS. If not repeat"""
+    """Generate a random number between 1 and 10. 
+    
+    If number is 8, 9, or 10 it is a PASS. If not repeat"""
     val = random.randint(1, 10)
     print (val)
     if test.state["product"] == "A":        
@@ -158,7 +168,7 @@ Phase Random 2 finished with result PhaseResult.SKIP
 
 
 
-### Interpreting exceptions as failures
+#### Interpreting exceptions as failures
 
 Normally, exceptions are catched by spintop-openhtf which translates them to a **PhaseOutcome.ERROR** outcome. To identify certain exceptions as a FAIL instead of as an error, you can add failure exceptions to the test plan.
 
@@ -172,31 +182,34 @@ def my_test(test):
     raise Exception('!!') # Will mark phase as FAIL instead of ERROR.
 
 ```
+:download:`Tutorial source <../tutorials/main_result_flow.py>`
 
+
+
+.. _test-hierarchy-label:
 ### Test Hierarchy 
 
 To build comprehensive test benches it is important to define a test hierarchy. We have already explored the declaration of a *test case* within a *test plan*, which creates a 2-level hierarchy. As we have defined our test benches, the *test plan*  inherits the status of the underlying *test cases*. If a *test case* fails, the *test plan* fails. The test bench does not need to remain a 2-level hierarchy. The *test plan* can be comprised of complex *test sequences* which in turn are comprised of *sub-sequences*, *testcases* and so on. 
 
-!!! result
-    - `test plan`
-        - `sequence 1`
-            - `sub-sequence 1A`
-                - `testcase 1A-1` 
-                - `testcase 1A-2`
-                - `testcase 1A-3` 
-            - `sub-sequence 1B`
-                - `testcase 1A-1`
-                - `testcase 1A-2`
-        - `sequence 2`
-            - `sub-sequence 2A`
-                - `testcase 2A-1`
-                - `testcase 2A-2`
+- `test plan`
+    - `sequence 1`
+        - `sub-sequence 1A`
+            - `testcase 1A-1` 
+            - `testcase 1A-2`
+            - `testcase 1A-3` 
+        - `sub-sequence 1B`
+            - `testcase 1A-1`
+            - `testcase 1A-2`
+    - `sequence 2`
+        - `sub-sequence 2A`
+            - `testcase 2A-1`
+            - `testcase 2A-2`
 
 Each level inherits the status of the underlying levels. They are all *test phases* and their statuses are defined by the phase outcome.
 
 
-
-## Defining Sequences or PhaseGroups
+.. _test-sequence-label:
+### Defining Sequences or PhaseGroups
 
 Spintop-openhtf uses **PhaseGroup** objects to instanciate *test sequences*. To define a *test sequence* within your *test plan*, simply use the TestSequence module. 
 
@@ -210,14 +223,15 @@ To add *test cases* to the sequence, instead of to the *test plan* itself, simpl
 
 ```python
 @sequence.testcase('Sleep Test 1')
-def sleep_test(test):
+def sleep_test_1(test):
     """Waits five seconds"""
     sleep(5)
     
 @sequence.testcase('Sleep Test 2')
-def sleep_test(test):
-    """Waits five seconds"""
+def sleep_test_2(test):
+    """Waits ten seconds"""
     sleep(10)
+
 ```
 
 This will create the following hierarchy
@@ -251,7 +265,9 @@ Thread finished: <PhaseExecutorThread: (Sleep Test 2)>
 Phase Sleep Test 2 finished with result PhaseResult.CONTINUE
 ```
 
-## Adding Levels to the Test Hierarchy
+:download:`Tutorial source <../tutorials/main_sequences.py>`
+
+### Adding Levels to the Test Hierarchy
 
 Further levels of hierarchy can be added using the *sub_sequence* function 
 
@@ -260,7 +276,7 @@ sequence = TestSequence('Sleep Sequence')
 sub_seq = sequence.sub_sequence('Sleep Sub Sequence 1')
 ```
 
-Use the new sub_sequence in the test case declaration to tie them to it.
+Use the new sub_sequence in the test case declaration to it to the sub_sequence.
 
 ```python
 sub_seq = sequence.sub_sequence('Sleep Sub Sequence 1')
@@ -283,7 +299,6 @@ def sleep_test_2(test):
 
 The above declarations will define the following hierarchy:
 
-!!! hierarchy
     - `test plan`
         - `Sleep Sequence`
             - `Sleep Sub Sequence 1` 
@@ -331,12 +346,15 @@ def sleep_test_1A_1(test):
 ```
 And so forth, to define the exact hierarchy needed for your test plan.
 
+:download:`Tutorial source <../tutorials/main_subsequences.py>`
 
-## Managing the Test Flow Based on the Trigger Phase
+
+
+### Managing the Test Flow Based on the Trigger Phase
 
 As we have seen previously, the trigger phase is used to input dynamic configuration parameters at the beginning of the test bench. This test configuration can be used to manipulate the test flow. For example, a choice of test to execute in the form of a dropdown list or a scanned entry of the product version can lead to a different execution.
 
-The test.state object is used to communicate *he information through the test bench. Let's first define a new variable which will allow the execution of *Sleep Test 2* if the product entered in the trigger phase is "A" 
+The test.state object is used to communicate the information through the test bench. Let's first define a new variable which will allow the execution of *Sleep Test 2* if the product entered in the trigger phase is "A" 
 
 
 ```python
@@ -365,26 +383,26 @@ def sleep_test_3(test):
 This definition will lead to the test being executed if the *run_sleep_2* of the test.state dictionary is set to **True**, that is if the product was entered as "A".
 
 Modify your test bench to reflect the above changes and run it again. When prompted enter "A" as the product. *Sleep Test 2* is executed. 
-!!! summary "Product = A"
-    ![Normal Form](img/dynamic-A.png)
+
+![Normal Form](img/dynamic-A.png)
 
 Re-execute it by entering "B" as the product
     
-!!! summary "Product = B"
-    ![Normal Form](img/dynamic-B.png)
+![Normal Form](img/dynamic-B.png)
+
+:download:`Tutorial source <../tutorials/main_dynamic_flow.py>`
 
 
-
-## Using a Set Up and a Teardown or Cleanup Phase
+### Using a Set Up and a Teardown or Cleanup Phase
 
 It is a good practice to define a setup and a teardown phase within your sequences. 
 
 - The *setup phase* is used to initialize the test environment to execute the test cases in the sequence.  Setup failure cancels the execution of the group, including the teardown. Define the setup phase using the *setup()* function.
 
-- The *teardown phase* is usually used to reset the test environment to a known status and is always executed at the end of a sequence if at least one sequence's test phases is executed. It si executed even if one of the phase fails and the other intermediary phaes are not. Define the teardown phase using the *teardown()* function.
+- The *teardown phase* is usually used to reset the test environment to a known status and is always executed at the end of a sequence if at least one sequence's test phases is executed. It is executed even if one of the phase fails and the other intermediary phaes are not. Define the teardown phase using the *teardown()* function.
 
 
-### Adding a setup and a teardown phase to a sub-sequence
+#### Adding a setup and a teardown phase to a sub-sequence
 
 Add a setup and a teardown phase to the Sleep Sub Sequence 1
 
@@ -412,7 +430,6 @@ def sub_cleanup(test):
     test.logger.info('Sub cleanup')
 ```
 
-!!! hierarchy
     - `test plan`
         - `Sleep Sequence`
             - `Sleep Sub Sequence 1` 
@@ -424,7 +441,7 @@ def sub_cleanup(test):
                 - `Sleep Test 2`
 
 
-### Final teardown
+#### Final teardown
 
 A teardown phase can also be defined for the *test plan* itself by calling the *teardown()* function from the *@plan* decorator. The plan teardown is used to securely shutdown the test bench (for example turning off all power sources, disconnecting from equipement, etc) whether the test has executed completely or has catastrophically 
 
@@ -434,4 +451,6 @@ def cleanup(test):
     """Says Cleaned up."""
     test.logger.info('Cleaned up.')
 ```
+
+:download:`Tutorial source <../tutorials/main_setup_teardown.py>`
 
