@@ -1,5 +1,5 @@
 
-Test Criteria
+9. Test Criteria
 =====================
 
 .. mdinclude:: criteria.md

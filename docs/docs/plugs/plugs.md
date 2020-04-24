@@ -39,26 +39,22 @@ Using plugs in spintop-openhtf is pretty straightforward. Let's take the UserInp
     @plan.testcase('TEST1')
     @plan.plug(prompt=UserInput) # 'prompt' is user-defined
     def test_1(test, prompt): # prompt will contain an instance of UserInput
-        ...
-    
+
     ```
 
-    The *class* of the plug is used as argument to the plug decorator. **This is important**. The executor will instantiate an instance of the class and use the same object across a test run. **On each new test, the plug will be re-instantiated.**
+The *class* of the plug is used as argument to the plug decorator. **This is important**. The executor will instantiate an instance of the class and use the same object across a test run. **On each new test, the plug will be re-instantiated.**
 
-!!! warning
+.. warning:: 
     You choose the name you want to give to the argument. The name must have a match in the function definition. For example, **the following would FAIL**:
 
-    ```python
+```python
 
-    # Will complain that 'prompt' is not an argument
-    @plan.testcase('TEST1')
-    @plan.plug(prompt=UserInput) 
-    def test_1(test, user_input): # WRONG. No user_input argument exists
-        ...
+# Will complain that 'prompt' is not an argument
+@plan.testcase('TEST1')
+@plan.plug(prompt=UserInput) 
+def test_1(test, user_input): # WRONG. No user_input argument exists
 
-    ```
-   
-
+```
 
 ## Creating Plugs
 
@@ -90,9 +86,17 @@ def file_copy_test(test, copy_plug):
     copy_plug.copy_file(source, destination)
 
 ```
-## spintop-openhtf Supported Plug
+
+:download:`Tutorial source <../tutorials/main_plug.py>`
+
+
+
+## spintop-openhtf Supported Plugs
 
 The supported hardware plugs are supported and documented in spintop-openhtf
+
+**TABLE A AJOUTER**
+
 
 | Plug | Description | Documentation  |
 |------|---------|---|
@@ -144,3 +148,5 @@ def LinuxTest(test, linux):
 	except:
 		test.logger.info ("COM Port open failed")
 		return PhaseResult.STOP
+
+```

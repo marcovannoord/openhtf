@@ -1,5 +1,5 @@
 
-Test Bench Configuration
+7. Test Bench Configuration
 =====================
 
 .. mdinclude:: static.md

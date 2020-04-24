@@ -236,11 +236,11 @@ def sleep_test_2(test):
 
 This will create the following hierarchy
 
-!!! hierarchy
-    - `test plan`
-        - `Sleep Sequence`
-            - `Sleep Test 1`
-            - `Sleep Test 2`
+
+- `test plan`
+    - `Sleep Sequence`
+        - `Sleep Test 1`
+        - `Sleep Test 2`
 
 To execute it, connect the sequence to its parent, append it to the *test plan*.
 

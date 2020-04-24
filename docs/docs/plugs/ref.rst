@@ -1,5 +1,5 @@
 
-Plugs
+8. Plugs
 =====================
 
 .. mdinclude:: plugs.md

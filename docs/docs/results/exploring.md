@@ -2,12 +2,9 @@
 
 ## Exploring the Test Results
 
-!!! summary "Summary"
-    This page illustrates how to find information in the test results
-
 ### Test Result Folder
 
-Each execution of the test bench creates a *test record* is stored on the test station computer. This *test record* is saved in the %localappdata%\tackv\spintop-openhtf\openhtf-history\test-bench-name\ folder. For example, "C:\Users\tack.user\AppData\Local\tackv\spintop-openhtf\openhtf-history\hello" for our **hello** test bench. 
+Each execution of the test bench creates a *test record* is stored on the test station computer. This *test record* is saved in the %localappdata%&#92;tackv&#92;spintop-openhtf&#92;openhtf-history&#92;test-bench-name&#92; folder. For example, C:\&#92;&#92;Users&#92;tack.user&#92;AppData&#92;Local&#92;tackv&#92;spintop-openhtf&#92;openhtf-history\&#92;hello for our **hello** test bench. 
 
 For each *test record* a folder is created with its name formatted as *dut-id_execution-date-and-time_result*. For example, SN01_2020_04_12_213700_409000_PASS is a test for the SN01 unit executed on April 12th which resulted in a global PASS. In the folder are all the results gathered during the test. 
 
@@ -98,7 +95,7 @@ For each phase is logged,
         },
 ```
 
-The measurements and criteria details are also added in case there was one defined for the phase with their parameters.
+The measurements and criteria details are also added with their parameters in case there was one defined for the phase.
 
 - name (measurements.*criterionname*.name)
 - outcome  (measurements.*criterionname*.outcome)
@@ -189,7 +186,7 @@ test.attach_from_file( os.path.join(os.path.dirname(__file__), 'example_attachme
 Create the ***example_attachment.txt*** file in the folder holding your test bench main, and add both lines to one of your test cases. Run the test bench and verify that the new test run has saved the test data correctly.
 
 
-### Loading Data from a Test Recoord File
+### Loading Data from a Test Record File
 
 Once a file has been saved in the test record, it becomes accessible from the source code. The ***test.get_attachment()*** function allows the loading of a test record file. Add the following to your test case to load the file created above by the ***test.attach*** function. 
 
@@ -199,3 +196,10 @@ print(test_attachment)
 ```
 
 You should see that the content of the ***test_attachment*** file has been printed in the console, that is 'This is test attachment data.'.
+
+
+
+:download:`Tutorial source <../tutorials/main_attachment.py>`
+
+
+:download:`Attachment file <../tutorials/example_attachment.txt>`

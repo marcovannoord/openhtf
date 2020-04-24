@@ -1,14 +1,14 @@
 
 .. _first-testbench-label:
 
-## First Test Bench
+## Running a First Test Bench
 
 
 Let's create our first testbench and explore the basic concept of the test plan. 
 
 Create a file called `main.py` in the folder in which you installed spintop-openhtf and copy this code.
 
-#### (V1) `main.py`
+#### Basic Testbench
 
 ```python
 # main.py
@@ -73,4 +73,4 @@ Hello Operator!
 ================ test: hello  outcome: PASS ================
 ```
 
-:download:`Tutorial source <../tutorials/main_first_testbench.py>`
+:download:`Tutorial source <tutorials/main_first_testbench.py>`

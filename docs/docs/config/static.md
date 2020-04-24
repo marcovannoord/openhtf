@@ -2,14 +2,9 @@
 
 ## Static configuration
 
-!!! summary "Summary"
-    This page illustrates the proposed method of implementation for the static configuration of test cases
-
 The static configuration are the parameters statically configuring the execution of the test plan. They are used to modify the flow of the test without changing the test cases or test tools code itself. The following examples illustrate test parameters that should be defined in the static configuration.
 
-.. _my-reference-label2:
 ### Definition
-
 
 In the context of a test bench implementation on spintop-openhtf, the static configuration is defined as classes of parameters accessible across the test bench sources.
 
@@ -69,7 +64,7 @@ class ProductVersionB():
     TEMP_SENSOR_I2C_ADDR = 0x48
 ```
 
-Add the product version selection in the trigger phase and import dynamically the right class depending on the selected product. As illustrated below, using the custom trigger phase from the [Implementing your own Trigger Phase](../../../../serguide/spintop-openhtf/test-flow/custom-trigger-phase) tutorial. 
+Add the product version selection in the trigger phase and import dynamically the right class depending on the selected product. As illustrated below, using the custom trigger phase from the :ref:`custom-trigger-phase-label` tutorial. 
 
 ```python
 if test.state["product"] == "A":
@@ -85,78 +80,8 @@ Add the above code to the sleep test case and run it again. Enter "A" for the pr
 I2C Address: 0x49
 ```
 
-### Tutorial source
 
-```python
-# main.py
-import os
+:download:`Tutorial source <../tutorials/main_static_config.py>`
 
-import openhtf as htf
-from openhtf.plugs.user_input import UserInput
-from spintop_openhtf import TestPlan
-from pprint import pprint
-from time import sleep
+:download:`Configuration file <../tutorials/static.py>`
 
-from static import SleepConfig
-
-from openhtf.util import conf
-
-
-FORM_LAYOUT = {
-    'schema':{
-        'title': "Test configuration",
-        'type': "object",
-        'required': ["operator, uutid, product"],
-        'properties': {
-            'operator': {
-                'type': "string", 
-                'title': "Enter the operator name"
-            },
-            'dutid': {
-                'type': "string", 
-                'title': "Enter the device under test serial number"
-            },
-            'product': {
-                'type': "string", 
-                'title': "Enter the product name"
-            }
-        }
-    },
-    'layout':[
-        "operator", "dutid", "product",
-    ]
-}
-
-""" Test Plan """
-
-# This defines the name of the testbench.
-plan = TestPlan('hello')
-
-
-@plan.trigger('Configuration')
-@plan.plug(prompts=UserInput)
-def trigger(test, prompts):
-    """Displays the configuration form"""
-    response = prompts.prompt_form(FORM_LAYOUT)
-    test.dut_id = response['dutid']
-    test.state["operator"] = response['operator']
-    test.state["product"] = response['product']
-    pprint (response)
-    
-    
-@plan.testcase('Sleep')
-def sleep_test(test):
-    """Waits five seconds"""
-    if test.state["product"] == "A":
-        from static import ProductVersionA as ProductConfig
-    elif test.state["product"] == "B":
-        from static import ProductVersionB as ProductConfig   
-    for x in range(SleepConfig.SLEEP_ITERATIONS):
-        print ("Sleep iteration {} - sleep time {}".format(x, SleepConfig.SLEEP_TIME))
-        sleep(SleepConfig.SLEEP_TIME)
-    print ("I2C Address: {}".format(ProductConfig.TEMP_SENSOR_I2C_ADDR))
-    
-    
-if __name__ == '__main__':
-    plan.run()
-```

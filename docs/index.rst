@@ -11,8 +11,8 @@ Welcome to Spintop OpenHTF's documentation!
    :caption: Contents:
    
    docs/getting-started/ref
-   docs/getting-started/tutorials
-   docs/getting-started/reference
+   docs/reference
+   docs/first-testbench
    docs/web-app/ref
    docs/form/ref
    docs/test-flow/ref
