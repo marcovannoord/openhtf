@@ -71,6 +71,7 @@ setup(
         'oauth2client>=4.1.3',
         'protobuf>=3.6.0,<4.0',
         'PyYAML>=5.0',
+        'pytz',
         'pyOpenSSL>=17.1.0,<18.0',
         'SheetFu>=1.4.1',
         'jsonschema>=3.0.2',

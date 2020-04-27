@@ -1,3 +1,6 @@
+import pytz
+from datetime import datetime
+
 from openhtf.core.test_record import Outcome, PhaseOutcome
 from openhtf.core.measurements import Outcome as MeasureOutcome
 from openhtf.util.data import convert_to_base_types
@@ -16,13 +19,12 @@ def create_outcome_validator(openhtf_record, outcome_cls=Outcome):
 class OpenHTFTestRecordTransformer(Transformer):
     
     def __call__(self, test_record):
-        import pandas as pd
         test_record = convert_to_base_types(test_record)
         builder = SpintopTreeTestRecordBuilder()
         
         outcome_is = create_outcome_validator(test_record)
         builder.set_top_level_information(
-            start_datetime=pd.to_datetime(test_record['start_time_millis'], unit='ms'),
+            start_datetime=datetime.utcfromtimestamp(test_record['start_time_millis']/1000.0).replace(tzinfo=pytz.timezone('UTC')),
             dut_id=test_record['dut_id'],
             testbench_name=test_record['metadata']['test_name'],
             duration=duration_of(test_record),

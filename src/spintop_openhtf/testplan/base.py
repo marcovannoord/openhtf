@@ -279,6 +279,7 @@ class TestPlan(TestSequence):
         station_server_port='4444', 
         capture_docstring=True
     )
+
     def __init__(self, name:str='testplan', store_result:bool=True):
         super(TestPlan, self).__init__(name=name)
         
@@ -394,33 +395,51 @@ class TestPlan(TestSequence):
         return self.run(launch_browser=launch_browser, once=True)
     
     def run(self, launch_browser=True, once=False):
-        """Run this test with the OpenHTF frontend.
+        """Run this test with the OpenHTF frontend. 
+
+        Requires the [server] extra to work. If you do not need the server, you should use
+        :meth:`~TestPlan.run_console` which disables completely the GUI server and increases
+        execution speed therefore.
         
         Args:
             launch_browser: When True, a browser page will open automatically when this is called.
             once: When False, the test will run in a loop; i.e. when a test ends a new one will start immediately.
         
         """
-        self._load_default_conf()
         with self._station_server_context(launch_browser):
-            while True:
-                try:
-                    self.execute()
-                except KeyboardInterrupt:
+            self._run(once)
+    
+    def run_console(self, once=False):
+        """Run this test without a frontend server and enables console input. 
+
+        To enable the server, use :meth:`~TestPlan.run` instead. 
+
+        Args:
+            once: When False, the test will run in a loop; i.e. when a test ends a new one will start immediately.
+        """
+        conf.load(user_input_enable_console=True)
+        self._run(once)
+
+    def _run(self, once):
+        while True:
+            try:
+                self.execute()
+            except KeyboardInterrupt:
+                break
+            finally:
+                if once:
                     break
-                finally:
-                    if once:
-                        break
     
     def freeze_test(self):
+        self._load_default_conf()
         self._execute_test = self._create_execute_test()
         
     @contextmanager
     def _station_server_context(self, launch_browser=True):
+        self._load_default_conf() # preload conf so that the server port conf values is populated.
         with station_server.StationServer(self.file_provider) as server:
             self.add_callbacks(server.publish_final_state)
-            self.assert_runnable() # Check before launching browser
-            self.freeze_test()
+            self.assert_runnable() # Check before launching browser. self.execute also checks when freezing the test.
             
             if launch_browser and conf['station_server_port']:
                 webbrowser.open('http://localhost:%s' % conf['station_server_port'])

@@ -88,7 +88,16 @@ def test_sub_sequence(test_plan):
     test_plan.execute()
     assert len(executed) == 3
         
-    
+
+def test_run_console():
+    plan = TestPlan('empty')
+
+    @plan.testcase('Nothing')
+    def test_something(test):
+        pass
+
+    plan.no_trigger()
+    plan.run_console(once=True)
     
     
     
