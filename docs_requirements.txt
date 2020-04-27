@@ -1,5 +1,5 @@
 -e ".[server, plugs.comport, plugs.ssh, plugs.visa]"
 -r test_requirements.txt
-sphinx
+sphinx==2.4.4
 m2r
 sphinx_rtd_theme
