@@ -102,12 +102,12 @@ repository
 │   |   │   B_criteria.py
 │
 └───test_tools: The test tools that are used to implement the test cases are defined in tool libraries.
-│   └───lib_A
-│   │   │   tools_A1.py
-│   │   │   tools_A2.py
-│   │
-│   └───lib_B
-│   └───lib_C
+    └───lib_A
+    │   │   tools_A1.py
+    │   │   tools_A2.py
+    │
+    └───lib_B
+    └───lib_C
 ```
 
         
@@ -139,17 +139,17 @@ repository
 │   │   static_config.py
 │
 └───test_sequences: The sequences are separated in folders which hold the sequence and test cases 
-│   │               declarations, the static configuration and the criterion specific to the sequence.
-│   └───sequence_A
-│   │   │   sequence_A.py
-│   │   │   A_static_config.py
-│   │   │   A_criteria.py
-│   │
-│   └───sequence_B
-│   │   │   sequence_B.py
-│   │   │   B_static_config.py
-│   |   │   B_criteria.py
-│
+    │               declarations, the static configuration and the criterion specific to the sequence.
+    └───sequence_A
+    │   │   sequence_A.py
+    │   │   A_static_config.py
+    │   │   A_criteria.py
+    │
+    └───sequence_B
+        │   sequence_B.py
+        │   B_static_config.py
+        │   B_criteria.py
+
 
 ```
 
@@ -162,8 +162,8 @@ repository
 │   main.py: Calls and runs the test bench. 
 │ 
 └───station_config: Each .yml file defines a different test station. 
-│   │   station_1.py
-│   │   station_2.py
+    │   station_1.py
+    │   station_2.py
 
 ```
 
@@ -176,9 +176,9 @@ repository
 │   main.py: Calls and runs the test bench. 
 │ 
 └───products: Each python file defines a different product through its static parameters.  
-│   │   product_A.py
-│   │   product_B.py
-│   │   product_C.py
+    │   product_A.py
+    │   product_B.py
+    │   product_C.py
 
 ```
 
@@ -193,13 +193,13 @@ repository
 │            outside of a spintop-openhtf test bench.  
 │ 
 └───test_cases: The functions that implement the test cases are defined in test case libraries. 
-│   └───lib_A
-│   │   │   cases_A1.py
-│   │   │   cases_A2.py
-│   │
-│   └───lib_B
-│   └───lib_C
-│
+    └───lib_A
+    │   │   cases_A1.py
+    │   │   cases_A2.py
+    │
+    └───lib_B
+    └───lib_C
+
 ```
 
 The following is an example of the definition of a test case in a library and how the a test sequence from the test bench repository calls it.
@@ -237,12 +237,12 @@ repository
 │            outside of a spintop-openhtf test bench.  
 │ 
 └───test_tools: The test tools that are used to implement the test cases are defined in tool libraries.
-│   └───lib_A
-│   │   │   tools_A1.py
-│   │   │   tools_A2.py
-│   │
-│   └───lib_B
-│   └───lib_C
+    └───lib_A
+    │   │   tools_A1.py
+    │   │   tools_A2.py
+    │
+    └───lib_B
+    └───lib_C
 
 ```
 
