@@ -58,11 +58,12 @@ sequence = TestSequence('Sleep Sequence')
 
 sequence = TestSequence('Sleep Sequence')
 sub_seq = sequence.sub_sequence('Sleep Sub Sequence 1')
+@sub_seq.testcase('Sleep Test 1A')
 def sleep_test_1(test):
     """Waits five seconds"""
     sleep(5)
     
-@sub_seq4.testcase('Sleep Test 1B')
+@sub_seq.testcase('Sleep Test 1B')
 def sleep_test_2(test):
     """Waits five seconds"""
     sleep(5)

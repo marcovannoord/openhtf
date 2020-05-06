@@ -60,40 +60,55 @@ Let's explore the single-repository test bench structure as proposed by the Tack
 
 As implied, the file structure is implementented in a single Git repository. A folder is created for each of the source categories explained above.
 
-- `main.py` Calls and runs the test bench. 
-- `criteria/` The criteria folder holds the global criteria for the test bench. Sequence specific criteria can be defined at the sequence level.
-    - `global_criteria.py`
-- `products/` Each python file defines a different product through its static parameters.  
-    - `product_A.py`
-    - `product_B.py`
-    - `product_C.py`
-- `station_config/` Each .yml file defines a different test station. 
-    - `station_1.yml`
-    - `station_2.yml`
-- `static_config/` The static config folder holds the product-independent static configuration for the test bench as a whole. Each sequence uses its own static configuration as well.
-    - `static_config.py`
-- `test_cases/` The functions that implement the test cases are defined in test case libraries. 
-    - `lib_A/`
-        - `cases_A1.py`
-        - `cases_A2.py`
-    - `lib_B/`
-    - `lib_C/`
-- `test_sequences/` The sequences are separated in folders which hold the sequence and test cases declarations, the static configuration and the criterion specific to the sequence.
-    - `sequence_A/`
-        - `sequence_A.py`
-        - `A_static_config.py`
-        - `A_criteria.py`
-    - `sequence_A/`
-        - `sequence_B.py`
-        - `B_static_config.py`
-        - `B_criteria.py`
-- `test_tools/` The test tools that are used to implement the test cases are defined in tool libraries.
-    - `lib_A/`
-        - `tools_A1.py`
-        - `tools_A2.py`
-    - `lib_B/`
-    - `lib_C/`
-
+```
+repository
+│   main.py: Calls and runs the test bench. 
+│ 
+└───criteria: The criteria folder holds the global criteria for the test bench. 
+│   │         Sequence specific criteria can be defined at the sequence level.
+│   │   global_criteria.py
+│
+└───products: Each python file defines a different product through its static parameters.  
+│   │   product_A.py
+│   │   product_B.py
+│   │   product_C.py
+│
+└───station_config: Each .yml file defines a different test station. 
+│   │   station_1.py
+│   │   station_2.py
+│
+└───static_config: The static config folder holds the product-independent static configuration for
+│   │              the test bench as a whole. Each sequence uses its own static configuration as well.
+│   │   static_config.py
+│
+└───test_cases: The functions that implement the test cases are defined in test case libraries. 
+│   └───lib_A
+│   │   │   cases_A1.py
+│   │   │   cases_A2.py
+│   │
+│   └───lib_B
+│   └───lib_C
+│
+└───test_sequences: The sequences are separated in folders which hold the sequence and test cases 
+│   │               declarations, the static configuration and the criterion specific to the sequence.
+│   └───sequence_A
+│   │   │   sequence_A.py
+│   │   │   A_static_config.py
+│   │   │   A_criteria.py
+│   │
+│   └───sequence_B
+│   │   │   sequence_B.py
+│   │   │   B_static_config.py
+│   |   │   B_criteria.py
+│
+└───test_tools: The test tools that are used to implement the test cases are defined in tool libraries.
+│   └───lib_A
+│   │   │   tools_A1.py
+│   │   │   tools_A2.py
+│   │
+│   └───lib_B
+│   └───lib_C
+```
 
         
 ## Proposed Multiple-Repository Structure
@@ -111,51 +126,81 @@ At the top level of the repository architecture are the test bench repositories.
 
 Each repository implements a specific test for a product or set of products. 
 
-    `repository/`
-    - `main.py` Calls and runs the test bench. 
-    - `criteria/` The criteria folder holds the global criteria for the test bench. Sequence specific criteria can be defined at the sequence level.
-        - `global_criteria.py`
-    - `static_config/` The static config folder holds the product-independent static configuration for the test bench as a whole. Each sequence uses its own static configuration as well.
-        - `static_config.py`
-    - `test_sequences/` The sequences are separated in folders which hold the sequence and test cases declarations, the static configuration and the criterion specific to the sequence.
-        - `sequence_A/`
-            - `sequence_A.py`
-            - `A_static_config.py`
-            - `A_criteria.py`
-        - `sequence_B/`
-            - `sequence_B.py`
-            - `A_static_config.py`
-            - `A_criteria.py`
+```
+repository
+│   main.py: Calls and runs the test bench. 
+│ 
+└───criteria: The criteria folder holds the global criteria for the test bench. 
+│   │         Sequence specific criteria can be defined at the sequence level.
+│   │   global_criteria.py
+│
+└───static_config: The static config folder holds the product-independent static configuration for
+│   │              the test bench as a whole. Each sequence uses its own static configuration as well.
+│   │   static_config.py
+│
+└───test_sequences: The sequences are separated in folders which hold the sequence and test cases 
+│   │               declarations, the static configuration and the criterion specific to the sequence.
+│   └───sequence_A
+│   │   │   sequence_A.py
+│   │   │   A_static_config.py
+│   │   │   A_criteria.py
+│   │
+│   └───sequence_B
+│   │   │   sequence_B.py
+│   │   │   B_static_config.py
+│   |   │   B_criteria.py
+│
+
+```
 
 ### Test Station Configuration Repository
 
 The test station configuration files are defined in a separate repository because any of the 4 test benches from our example can use any of the test stations. It prevents the duplication of information and allows the test bench maintainer to modify a single file when a station is modified instead of having to correct the file in each test bench repository.
 
-    `repository/`
-    - `station_1.yml` 
-    - `station_2.yml` 
-    - `station_3.yml` 
+```
+repository
+│   main.py: Calls and runs the test bench. 
+│ 
+└───station_config: Each .yml file defines a different test station. 
+│   │   station_1.py
+│   │   station_2.py
+
+```
 
 ### Product Definition Repository
 
 The production definition configuration files are defined in a separate repository because any of the 4 test benches from our example can test one product or the other. It prevents the duplication of information and allows the test bench developper to modify a product definition in a single file which will impact all test benches. 
 
-    `repository/`
-    - `product_A.py`
-    - `product_B.py`
-    - `product_C.py`
+```
+repository
+│   main.py: Calls and runs the test bench. 
+│ 
+└───products: Each python file defines a different product through its static parameters.  
+│   │   product_A.py
+│   │   product_B.py
+│   │   product_C.py
+
+```
 
 ### Test Cases Library Repository
 
 The test case libraries are imported by the test benches to be called by their sequences. Their implementation is made independent from the spintop-openhtf context, meaning that the definition of the test cases as spintop-openhtf phases is made in the sequences of the test bench repository. This allows the test case implementations in this repository to be used outside of a spintop-openhtf test bench, for example as a standalone debugging python executable.
 
-    `repository/`
-    - `case_lib_A`
-        - `cases_A1.py`
-        - `cases_A2.py`
-    - `case_lib_B`
-    - `case_lib_C`
-    - `main.py` The main in the test case repository is used to test or use the test cases outside of a spintop-openhtf test benchs. 
+
+```
+repository
+│   main.py: The main in the test case repository is used to test or use the test cases 
+│            outside of a spintop-openhtf test bench.  
+│ 
+└───test_cases: The functions that implement the test cases are defined in test case libraries. 
+│   └───lib_A
+│   │   │   cases_A1.py
+│   │   │   cases_A2.py
+│   │
+│   └───lib_B
+│   └───lib_C
+│
+```
 
 The following is an example of the definition of a test case in a library and how the a test sequence from the test bench repository calls it.
 
@@ -186,12 +231,21 @@ As can be seen, the spintop-openhtf test case is defined in the test bench repos
 
 The test tools libraries implement functions that control and monitor the product of the equipment around it. They can be implemented as plugs and can wrap plugs from the spintop-openhtf tool libraries. They can be imported and used by the test case libraries or directly by the test bench repository. The test tools are meant to be usable outside of a spintop-openhtf test bench.
 
-!!! test-tools repository
-    - `tool_lib_A`
-        - `tools_A1.py`
-        - `tools_A2.py`
-    - `tool_lib_B`
-    - `tool_lib_C`
+```
+repository
+│   main.py: The main in the tools repository is used to test or use the tools
+│            outside of a spintop-openhtf test bench.  
+│ 
+└───test_tools: The test tools that are used to implement the test cases are defined in tool libraries.
+│   └───lib_A
+│   │   │   tools_A1.py
+│   │   │   tools_A2.py
+│   │
+│   └───lib_B
+│   └───lib_C
+
+```
+
 
 ### Unit-testing and Debugging
 

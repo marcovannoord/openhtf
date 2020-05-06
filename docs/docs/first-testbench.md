@@ -50,7 +50,7 @@ And finally the test plan is executed when the script is launched.
 ```python
 if __name__ == '__main__':
     plan.no_trigger()
-    plan.run()
+    plan.run_console() 
 
 ```
 

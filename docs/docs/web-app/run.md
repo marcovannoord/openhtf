@@ -7,16 +7,15 @@ spintop-openhtf uses a web interface to interact with the test operator.
 
 ## Exploration of the Interface
 
-Let's explore the web application. To do so, make sure you have gone through the :ref:`first-testbench-label`. tutorial and run the test bench written in it. In the test bench projet, run
+Let's explore the web application. To do so, make sure you have gone through the :ref:`first-testbench-label` tutorial. Modify it, replacing the main to run with the web application.
 
-```bat
-# Windows Activate
-venv\Scripts\activate 
-
-python main.py
+```python
+if __name__ == '__main__':
+    plan.no_trigger()
+    plan.run() 
 ```
 
-The web interface should load automatically in your default browser. The following image indicates the different sections of the web interface.
+Run the new testbench. The web interface should load automatically in your default browser. The following image indicates the different sections of the web interface.
 
 ![Exploring the web interface](img/web.png)
 
@@ -42,7 +41,6 @@ To access the full results of any of the tests on the list, click on the test yo
 ![Exploring the web interface](img/web-past-selected.png)
 
 
-
-:download:`Tutorial source <../tutorials/main_first_testbench.py>`
+:download:`Tutorial source <../tutorials/main_web_app.py>`
 
 

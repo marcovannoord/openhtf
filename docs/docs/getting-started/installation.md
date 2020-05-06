@@ -54,7 +54,5 @@ Here are the installation steps on Windows:
 3. Install spintop-openhtf
 
     ```bat
-    python -m pip install spintop-openhtf
+    python -m pip install spintop-openhtf[server]
     ```
-
-You can validate that the installation succeeded using `python -m examples.hello_world`. This will run the basic OpenHTF hello world example without the spintop layer. The example will ask for the entry of a DUT ID from the user and display a passed test once it is done.

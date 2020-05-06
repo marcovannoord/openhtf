@@ -2,7 +2,7 @@
 
 .. _structure-label:
 
-6. Project Structure
+6. Proposed Project Structure
 =====================
 
 .. mdinclude:: proposed.md

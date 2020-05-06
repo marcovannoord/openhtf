@@ -1,5 +1,5 @@
 
-4. Test Bench Definition
+4. Test Bench Definition Tutorial
 =====================
 
 .. mdinclude:: trigger-phase.md

@@ -18,4 +18,4 @@ def hello_world(test, prompts):
     
 if __name__ == '__main__':
     plan.no_trigger()
-    plan.run_console()
+    plan.run()

@@ -19,7 +19,6 @@ def criteria_test(test):
     value = 12
     test.measurements.test_criterion = value	
     
-
    
 if __name__ == '__main__':
     plan.run()

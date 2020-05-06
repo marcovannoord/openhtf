@@ -1,5 +1,5 @@
 
-8. Plugs
+8. Plugs Tutorial
 =====================
 
 .. mdinclude:: plugs.md

@@ -1,5 +1,5 @@
 
-7. Test Bench Configuration
+7. Test Bench Configuration Tutorial
 =====================
 
 .. mdinclude:: static.md

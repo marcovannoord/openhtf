@@ -35,7 +35,6 @@ plan = TestPlan('hello')
 def hello_world(test, prompts):
     """Displays the custom from defined above"""
     prompts.prompt_form(FORM_LAYOUT)
-    test.impedance = response['impedance']
     
 if __name__ == '__main__':
     plan.no_trigger()

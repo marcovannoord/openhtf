@@ -17,8 +17,8 @@ Here the criterion defined will return a PASS if the value evaluated is between 
 Use the htf.measures decorator to use the defined criterion in a test case. 
 
 ```python
-@htf.measures(criterion)
 @plan.testcase('Criteria test')
+@htf.measures(criterion)
 def criteria_test(test): 
     value = 20
     test.measurements.test_criterion = 	value	
@@ -71,8 +71,6 @@ Using the with_validator function helps you create complex criteria that match y
 
 For more details on the different types of criteria that can be implemented please refer the the Measurements reference
 
-**LINK TO REFERENCE**
-
 ## Documentation
 
 It is possible to add documentation to the criterion with the *doc()* function
@@ -81,10 +79,6 @@ It is possible to add documentation to the criterion with the *doc()* function
 criterion = htf.Measurement('test_criterion').in_range(18, 22)
                     .doc('This measurement helps illustrate the criteria usage in spintop-openhtf')
 ```
-
-**WHERE DOES THE DOCUMENTATION APPEAR**
-
-
 
 ## Using a criteria definition file
 

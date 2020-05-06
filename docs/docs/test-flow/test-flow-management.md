@@ -191,19 +191,21 @@ def my_test(test):
 
 To build comprehensive test benches it is important to define a test hierarchy. We have already explored the declaration of a *test case* within a *test plan*, which creates a 2-level hierarchy. As we have defined our test benches, the *test plan*  inherits the status of the underlying *test cases*. If a *test case* fails, the *test plan* fails. The test bench does not need to remain a 2-level hierarchy. The *test plan* can be comprised of complex *test sequences* which in turn are comprised of *sub-sequences*, *testcases* and so on. 
 
-- `test plan`
-    - `sequence 1`
-        - `sub-sequence 1A`
-            - `testcase 1A-1` 
-            - `testcase 1A-2`
-            - `testcase 1A-3` 
-        - `sub-sequence 1B`
-            - `testcase 1A-1`
-            - `testcase 1A-2`
-    - `sequence 2`
-        - `sub-sequence 2A`
-            - `testcase 2A-1`
-            - `testcase 2A-2`
+```
+Test Plan
+└─── Sequence 1
+│    └─── Sub-sequence 1A
+│    │    └─── Testcase 1A-1
+│    │    └─── Testcase 1A-2
+│    │    └─── Testcase 1A-3
+│    └─── Sub-sequence 1B
+│         └─── Testcase 1B-1
+│         └─── Testcase 1B-2
+└─── Sequence 2
+     └─── Sub-sequence 2A
+          └─── Testcase 2A-1
+          └─── Testcase 2A-2
+```
 
 Each level inherits the status of the underlying levels. They are all *test phases* and their statuses are defined by the phase outcome.
 
@@ -237,10 +239,12 @@ def sleep_test_2(test):
 This will create the following hierarchy
 
 
-- `test plan`
-    - `Sleep Sequence`
-        - `Sleep Test 1`
-        - `Sleep Test 2`
+```
+Test Plan
+└─── Sleep Sequence
+     └─── Sleep Test 1
+     └─── Sleep Test 2
+```
 
 To execute it, connect the sequence to its parent, append it to the *test plan*.
 
@@ -299,14 +303,15 @@ def sleep_test_2(test):
 
 The above declarations will define the following hierarchy:
 
-    - `test plan`
-        - `Sleep Sequence`
-            - `Sleep Sub Sequence 1` 
-                - `Sleep Test 1A`
-                - `Sleep Test 1B`
-            - `Sleep Sub Sequence 2` 
-                - `Sleep Test 2`
-
+```
+test plan
+└─── Sleep Sequence
+     └─── Sleep Sub Sequence 1
+     │    └─── Sleep Test 1A
+     │    └─── Sleep Test 1B
+     └─── Sleep Sub Sequence 2
+          └─── Sleep Test 2
+```
 
 
 Add the new sub-sequences to your latest test bench and run it. 
@@ -429,16 +434,17 @@ def sub_cleanup(test):
     """Says Sub cleanup."""
     test.logger.info('Sub cleanup')
 ```
-
-    - `test plan`
-        - `Sleep Sequence`
-            - `Sleep Sub Sequence 1` 
-                - `Sub-sequence Setup`
-                - `Sleep Test 1A`
-                - `Sleep Test 1B`
-                - `Sub-sequence Cleanup`
-            - `Sleep Sub Sequence 2` 
-                - `Sleep Test 2`
+```
+Test Plan
+└─── Sleep Sequence
+     └─── Sleep Sub Sequence 1
+     │    └─── Sub-sequence Setup
+     │    └─── Sleep Test 1A
+     │    └─── Sleep Test 1B
+     │    └─── Sub-sequence Cleanup
+     └─── Sleep Sub Sequence 2
+          └─── Sleep Test 2
+```
 
 
 #### Final teardown

@@ -91,21 +91,6 @@ def file_copy_test(test, copy_plug):
 
 
 
-## spintop-openhtf Supported Plugs
-
-The supported hardware plugs are supported and documented in spintop-openhtf
-
-**TABLE A AJOUTER**
-
-
-| Plug | Description | Documentation  |
-|------|---------|---|
-| base plug  | - |  https://spintop-openhtf.readthedocs.io/en/next/docs/ref.html#base-interface |  
-| comport    | Implements the control of a shell interface over a serial port | https://spintop-openhtf.readthedocs.io/en/next/docs/ref.html#com-port-interface   |  
-| ssh        | Implements the control of a shell interface over an ssh connection        | https://spintop-openhtf.readthedocs.io/en/next/docs/ref.html#ssh-interface   |  
-| visa       | Implements the control of         |   | 
-
-
 ## Wrapping spintop-openhtf Plugs
 
 A typical manner of creating custom plugs for a test bench is to wrap an existing, spintop-openhtf plug, to add applicative functionalities to it. 

@@ -1,5 +1,5 @@
 
-9. Test Criteria
+9. Test Criteria Tutorial
 =====================
 
 .. mdinclude:: criteria.md
