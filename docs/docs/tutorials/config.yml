@@ -1,0 +1,7 @@
+station:
+ id : "Tutorial Station"
+serial  :
+ comport: "COM4"
+ baudrate : "115200"
+ip_address : "192.168.0.100"
+test_constant: 4
