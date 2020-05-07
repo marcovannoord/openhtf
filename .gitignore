@@ -48,3 +48,5 @@ other_modules/
 
 # Tox temporary files
 .tox/
+
+*.hello_world.json
