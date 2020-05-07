@@ -406,6 +406,7 @@ class TestPlan(TestSequence):
             once: When False, the test will run in a loop; i.e. when a test ends a new one will start immediately.
         
         """
+        conf.load(user_input_enable_console=False, _override=False)
         with self._station_server_context(launch_browser):
             self._run(once)
     
@@ -417,7 +418,6 @@ class TestPlan(TestSequence):
         Args:
             once: When False, the test will run in a loop; i.e. when a test ends a new one will start immediately.
         """
-        conf.load(user_input_enable_console=True)
         self._run(once)
 
     def _run(self, once):

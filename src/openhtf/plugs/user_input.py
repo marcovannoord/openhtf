@@ -56,7 +56,7 @@ PromptType = enum.Enum('PromptType', [
 conf.declare(
   'user_input_enable_console', 
   'If True, enables user input collection in console prompt.', 
-  default_value=False
+  default_value=True
 )
 
 class InvalidOption(Exception):

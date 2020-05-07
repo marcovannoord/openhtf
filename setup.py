@@ -27,7 +27,7 @@ packages =  find_packages('src')
 setup(
     name='spintop-openhtf',
     version=VERSION,
-    description='A complete integration to spintop and the SPIN Suite using OpenHTF. OpenHTF is currently vendored-in.',
+    description='A complete integration to spintop.io using OpenHTF. OpenHTF is currently vendored-in.',
     author='William Laroche',
     author_email='william.laroche@tackv.ca',
     maintainer='William Laroche',
