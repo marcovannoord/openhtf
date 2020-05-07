@@ -25,7 +25,7 @@ import mock
 
 import openhtf as htf
 from openhtf import util
-from examples import all_the_things
+from openhtf.examples import all_the_things
 from openhtf.output.callbacks import mfg_inspector
 from openhtf.output.proto import mfg_event_converter
 from openhtf.output.proto import mfg_event_pb2

@@ -21,7 +21,7 @@ from openhtf.output.callbacks import console_summary
 from openhtf.output.callbacks import json_factory
 from openhtf.util import checkpoints
 
-from examples import measurements as measurements_example
+from openhtf.examples import measurements as measurements_example
 
 
 @htf.measures(htf.Measurement('fixed_time').in_range(0, 10).doc(

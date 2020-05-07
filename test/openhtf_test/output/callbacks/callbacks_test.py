@@ -24,7 +24,7 @@ import unittest
 
 import openhtf as htf
 from openhtf import util
-from examples import all_the_things
+from openhtf.examples import all_the_things
 from openhtf.output.callbacks import console_summary
 from openhtf.output.callbacks import json_factory
 from openhtf.output.proto import mfg_event_converter

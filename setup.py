@@ -38,11 +38,9 @@ setup(
     },
     packages=packages,
     package_data={
-        'examples': [
-            'example_attachment.txt',
-            'example_config.yaml'
-        ],
         'openhtf': [
+            'examples/example_attachment.txt',
+            'examples/example_config.yaml'
             'output/proto/*.proto',
             'output/web_gui/dist/*',
             'output/web_gui/dist/css/*',
@@ -79,7 +77,7 @@ setup(
     ],
     extras_require={
         'server':[ # Allows the different GUI servers. Can still run without GUI.
-            'tornado>=4.3,<5.0', 
+            'tornado>=4.3,<5.0',
             'sockjs-tornado>=1.0.3,<2.0',
         ],
         'plugs.comport':[

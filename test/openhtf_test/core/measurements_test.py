@@ -26,7 +26,7 @@ from openhtf.core import measurements
 
 import mock
 
-from examples import all_the_things
+from openhtf.examples import all_the_things
 import openhtf as htf
 from openhtf.util import test as htf_test
 

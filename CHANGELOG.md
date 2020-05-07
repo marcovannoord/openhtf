@@ -14,10 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - TestPlan
   - OpenHTF Configuration & default values
   - Plugs: Comport, SSH and VISA.
+- Added the spintop-openhtf examples in source at `spintop_openhtf.examples`
 
 ### Changed
 - Spintop-OpenHTF with the GUI now needs to be installed with the [server] extra (pip install spintop-openhtf[server]==0.6.0). This is to avoid conflicts with the old version of tornado (4.0) that openhtf uses.
 - Changed imports of ABCs from `collections` to `collections.abc` to comply with Python 3.8 deprecation.
+- The examples of openhtf are now in the package `openhtf.examples` instead of the top-level package `examples`
 
 ### Fixed
 - Issue #13. An object reference bug sometimes caused the frontend to not be notified when a new test started.
