@@ -27,7 +27,7 @@ packages =  find_packages('src')
 setup(
     name='spintop-openhtf',
     version=VERSION,
-    description='A complete integration to spintop and the SPIN Suite using OpenHTF. OpenHTF is currently vendored-in.',
+    description='A complete integration to spintop.io using OpenHTF. OpenHTF is currently vendored-in.',
     author='William Laroche',
     author_email='william.laroche@tackv.ca',
     maintainer='William Laroche',
@@ -38,11 +38,9 @@ setup(
     },
     packages=packages,
     package_data={
-        'examples': [
-            'example_attachment.txt',
-            'example_config.yaml'
-        ],
         'openhtf': [
+            'examples/example_attachment.txt',
+            'examples/example_config.yaml'
             'output/proto/*.proto',
             'output/web_gui/dist/*',
             'output/web_gui/dist/css/*',
@@ -71,6 +69,7 @@ setup(
         'oauth2client>=4.1.3',
         'protobuf>=3.6.0,<4.0',
         'PyYAML>=5.0',
+        'pytz',
         'pyOpenSSL>=17.1.0,<18.0',
         'SheetFu>=1.4.1',
         'jsonschema>=3.0.2',
@@ -78,7 +77,7 @@ setup(
     ],
     extras_require={
         'server':[ # Allows the different GUI servers. Can still run without GUI.
-            'tornado>=4.3,<5.0', 
+            'tornado>=4.3,<5.0',
             'sockjs-tornado>=1.0.3,<2.0',
         ],
         'plugs.comport':[

@@ -192,8 +192,21 @@ class StationWatcher(threading.Thread):
     # Wait for the test state or a plug state to change, or for the previously
     # executing test to finish.
     while not _wait_for_any_event(events, _CHECK_FOR_FINISHED_TEST_POLL_S):
-      new_test, _ = _get_executing_test()
+      new_test, new_test_state = _get_executing_test()
       if test != new_test:
+        break
+      if test_state.execution_uid != new_test_state.execution_uid:
+        # TODO
+        
+        # This fixes a race condition that sometimes happen between tests
+        # causing the last websocket message to contain the last test's uid
+        # and forcing a 404 error when the frontend tries to fetch the test phases.
+
+        # For some reason, between new_test, new_test_state, test and new_test,
+        # only new_test_state has the old UID which caused the previous if clause
+        # to not notice the change of test and enter an infinte loop.
+
+        # This may point to an underlying bug, but this was introduced as a quick fix.
         break
 
   @classmethod

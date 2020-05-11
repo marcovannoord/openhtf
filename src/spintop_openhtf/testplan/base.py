@@ -4,6 +4,8 @@ import inspect
 import datetime
 import warnings
 
+from typing import Callable, Union
+
 from copy import copy
 from contextlib import contextmanager
 
@@ -51,6 +53,57 @@ DEFAULT = object()
 class TestPlanError(Exception): pass
 
 class TestSequence(object):
+    """The base sequence object: defines a sequence of setup, test and teardown openhtf phases.
+    
+    TestSequences can be nested together in two different ways:
+    
+    Option 1. 
+        If the sequence should be re-usable, create an explicit :class:`TestSequence` object 
+        and add :meth:`~TestSequence.setup`, :meth:`~TestSequence.testcase` and :meth:`~TestSequence.teardown`
+        phases using the decorator methods. Afterwards, add it to a specific TestPlan (or sub TestSequence)
+        using :meth:`~TestSequence.append`:
+
+        .. highlight:: python
+        .. code-block:: python
+
+            from spintop_openhtf import TestSequence, TestPlan
+
+            my_sequence = TestSequence('my-sequence')
+
+            @my_sequence.testcase('Test1')
+            def do_something(test):
+                pass
+
+            # Elsewhere probably
+
+            plan = TestPlan('my-plan')
+            plan.append(my_sequence)
+
+    Option 2.
+        If the sequence is defined simply to nest phases inside the same test plan, the
+        :meth:`~TestSequence.sub_sequence` simplifies the declaration and usage of a sub
+        sequence. This code block is equivalent to the previous one, but does not allow
+        re-usage of the sub_sequence object:
+        
+        .. highlight:: python
+        .. code-block:: python
+
+            from spintop_openhtf import TestPlan
+
+            plan = TestPlan('my-plan')
+
+            my_sequence = plan.sub_sequence('my-sequence')
+
+            @my_sequence.testcase('Test1')
+            def do_something(test):
+                pass
+
+    Since TestPlans are TestSequences, and sub sequences are also TestSequences,
+    they can be infinitely nested using :meth:`~TestSequence.append` and :meth:`~TestSequence.sub_sequence`.
+
+    Args:
+        name: The name of this test node.
+    """
     def __init__(self, name):
         self._setup_phases = []
         self._test_phases = []
@@ -60,33 +113,53 @@ class TestSequence(object):
     def setup(self, name, **options):
         """Decorator factory for a setup function.
         
-        ```python
-        my_sequence = TestSequence('Parent')
-        
-        @my_sequence.setup('my-setup-name')
-        def setup_fn(test):
-            (...)
-        
-        ```
+        A setup function will executed if the sequence is entered. 
+        All setup functions are executed before the testcases, regardless of the order
+        of declaration.
+
+        See :meth:`~TestSequence.testcase` for usage.
         """
         return self._decorate_phase(name, self._setup_phases, options)
     
     def testcase(self, name, **options):
         """Decorator factory for a normal phase. 
+        
+        A testcase function is a normal openhtf phase.
+        
+        The options parameter is a proxy for the PhaseOptions arguments.
+                
+        .. highlight:: python
+        .. code-block:: python
+        
+            my_sequence = TestSequence('Parent')
+        
+            @my_sequence.testcase('my-testcase-name')
+            def setup_fn(test):
+                (...)
+        
+        {phase_options_doc}
         """
         return self._decorate_phase(name, self._test_phases, options)
     
+    # Add PhaseOptions documentation
+    testcase.__doc__ = testcase.__doc__.format(phase_options_doc=htf.PhaseOptions.__doc__)
+    
     def teardown(self, name, **options):
         """Decorator factory for a teardown phase. 
+
+        A teardown function will always be executed if the sequence is entered, regardless
+        of the outcome of normal or setup phases.
+
+        See :meth:`~TestSequence.testcase` for usage.
         """
         return self._decorate_phase(name, self._teardown_phases, options)
     
     def plug(self, *args, **kwargs):
-        """Helper method: shortcut to htf.plugs.plug(...)"""
+        """Helper method: shortcut to :func:`openhtf.plug`"""
         return htf.plugs.plug(*args, **kwargs)
     
     def measures(self, *args, **kwargs):
-        """Helper method: shortcut to htf.measures(...)"""
+        """Helper method: shortcut to :func:`openhtf.measures`"""
         return htf.plugs.plug(*args, **kwargs)
     
     def sub_sequence(self, name):
@@ -94,23 +167,32 @@ class TestSequence(object):
         
         The following two snippets are equivalent:
         
-        ```python
-        my_sequence = TestSequence('Parent')
-        sub_sequence = my_sequence.sub_sequence('Child')
-        ```
+        .. highlight:: python
+        .. code-block:: python
         
-        ```python
-        my_sequence = TestSequence('Parent')
-        sub_sequence = TestSequence('Child')
-        my_sequence.append(sub_sequence)
-        ```
+            my_sequence = TestSequence('Parent')
+            sub_sequence = my_sequence.sub_sequence('Child')
+        
+        .. highlight:: python
+        .. code-block:: python
+        
+            my_sequence = TestSequence('Parent')
+            sub_sequence = TestSequence('Child')
+            my_sequence.append(sub_sequence)
+            
         """
         group = TestSequence(name)
         self.append(group)
         return group
     
-    def append(self, phase):
-        self._test_phases.append(phase)
+    def append(self, *phases):
+        """ Append normal phases (or sequences) to this test plan.
+
+        Args:
+            phases: The phases to append.
+        """
+        for phase in phases:
+            self._test_phases.append(phase)
         
     def _decorate_phase(self, name, array, options=None):
         if not options:
@@ -140,11 +222,65 @@ class TestSequence(object):
         )
     
 class TestPlan(TestSequence):
+    """ The core spintop-openhtf interface to create an openhtf sequence.
+
+    :class:`TestPlan` simplifies the creating of openhtf sequences. Instead of declaring
+    functions and adding them as an array to openhtf, the test plan allows 
+    declarative addition of function using decorators.
+
+    The TestPlan is itself a :class:`TestSequence` and therefore implements all methods
+    defined there.
+
+    In OpenHTF, you would do the following:
+
+    .. highlight:: python
+    .. code-block:: python
+
+        import openhtf as htf
+
+        @htf.plug(my_plug=...)
+        def example_test(test, my_plug):
+            time.sleep(.2)
+
+        @htf.plug(my_plug=...)
+        def example_test2(test, my_plug):
+            time.sleep(.2)
+
+        test = htf.Test(example_test, example_test2)
+        test.run() # Run once only
+
+    With the TestPlan, you can do the following (equivalent):
+    
+    .. highlight:: python
+    .. code-block:: python
+
+        from spintop_openhtf import TestPlan
+
+        plan = TestPlan('my-test-name')
+
+        @plan.testcase('Test1')
+        @plan.plug(my_plug=...)
+        def example_test(test, my_plug):
+            time.sleep(.2)
+
+        @plan.testcase('Test2')
+        @plan.plug(my_plug=...)
+        def example_test2(test, my_plug):
+            time.sleep(.2)
+
+        plan.run_once()
+
+    Args:
+        name: The name of the test plan. Used to identify the 'type' of the test.
+        store_result: Whether results should automatically be stored as JSON in the
+            spintop_openhtf site directory.
+    """
     DEFAULT_CONF = dict(
         station_server_port='4444', 
         capture_docstring=True
     )
-    def __init__(self, name='testplan', store_result=True):
+
+    def __init__(self, name:str='testplan', store_result:bool=True):
         super(TestPlan, self).__init__(name=name)
         
         self._execute_test = None
@@ -164,39 +300,50 @@ class TestPlan(TestSequence):
         self.failure_exceptions = (user_input.SecondaryOptionOccured,)
 
     @property
-    def execute_test(self):
+    def execute_test(self) -> Callable:
         """Returns a function that takes no arguments and that executes the test described by this test plan."""
         if not self._execute_test:
             self.freeze_test()
         return self._execute_test
     
     @property
-    def history_path(self):
+    def history_path(self) -> str:
+        """The base path where results of the tests defined by this object are stored."""
         path = os.path.join(HISTORY_BASE_PATH, self.name)
         if not os.path.exists(path):
             os.makedirs(path)
         return path
     
     @property
-    def is_runnable(self):
+    def is_runnable(self) -> bool:
+        """Whether this test plan contains any runnable phases."""
         phases = self._test_phases + self._trigger_phases
         return bool(phases)
     
     @property
-    def trigger_phase(self):
+    def trigger_phase(self) -> Union[Callable, None]:
+        """Returns the defined """
         return self._trigger_phases[0] if self._trigger_phases else None
         
     @property
     def is_test_frozen(self):
         return bool(self._execute_test)
         
-    def image_url(self, url):
+    def image_url(self, url:str) -> str:
+        """Creates a temporary hosted image based on the specified file path.
+        
+        Args:
+            url: The image path.
+        
+        Returns:
+            The temporary url associated with this image. Can be used in custom forms to show images.
+        """
         return self.file_provider.create_url(url)
     
-    def trigger(self, name, **options):
+    def trigger(self, name:str, **options):
         """Decorator factory for the trigger phase. 
         
-        Similar to `testcase`, except that this function will be used as the test trigger.
+        Similar to :meth:`~TestPlan.testcase`, except that this function will be used as the test trigger.
         
         The test trigger is a special test phase that is executed before test officialy start.
         Once this phase is complete, the test will start. Usually used to configure the test with
@@ -207,9 +354,28 @@ class TestPlan(TestSequence):
         return self._decorate_phase(name, self._trigger_phases, options)
 
     def no_trigger(self):
+        """Removes the need for a trigger and removes the default trigger.
+        
+        .. highlight:: python
+        .. code-block:: python
+
+            plan = TestPlan('my-plan')
+            plan.no_trigger()
+
+            # ... 
+            
+            plan.run() # Will start immediately.
+
+        """
         self._no_trigger = True
     
     def add_callbacks(self, *callbacks):
+        """Add custom callbacks to the underlying openhtf test.
+        
+        Args:
+            callbacks:
+                The callbacks to add.
+        """
         if self.is_test_frozen:
             raise RuntimeError('Cannot add callbacks to the test plan after the test was frozen.')
         self.callbacks += callbacks
@@ -225,29 +391,55 @@ class TestPlan(TestSequence):
         return self.execute_test()
     
     def run_once(self, launch_browser=True):
+        """Shortcut for :meth:`~TestPlan.run` with once=True."""
         return self.run(launch_browser=launch_browser, once=True)
     
     def run(self, launch_browser=True, once=False):
-        self._load_default_conf()
+        """Run this test with the OpenHTF frontend. 
+
+        Requires the [server] extra to work. If you do not need the server, you should use
+        :meth:`~TestPlan.run_console` which disables completely the GUI server and increases
+        execution speed therefore.
+        
+        Args:
+            launch_browser: When True, a browser page will open automatically when this is called.
+            once: When False, the test will run in a loop; i.e. when a test ends a new one will start immediately.
+        
+        """
+        conf.load(user_input_enable_console=False, _override=False)
         with self._station_server_context(launch_browser):
-            while True:
-                try:
-                    self.execute()
-                except KeyboardInterrupt:
+            self._run(once)
+    
+    def run_console(self, once=False):
+        """Run this test without a frontend server and enables console input. 
+
+        To enable the server, use :meth:`~TestPlan.run` instead. 
+
+        Args:
+            once: When False, the test will run in a loop; i.e. when a test ends a new one will start immediately.
+        """
+        self._run(once)
+
+    def _run(self, once):
+        while True:
+            try:
+                self.execute()
+            except KeyboardInterrupt:
+                break
+            finally:
+                if once:
                     break
-                finally:
-                    if once:
-                        break
     
     def freeze_test(self):
+        self._load_default_conf()
         self._execute_test = self._create_execute_test()
         
     @contextmanager
     def _station_server_context(self, launch_browser=True):
+        self._load_default_conf() # preload conf so that the server port conf values is populated.
         with station_server.StationServer(self.file_provider) as server:
             self.add_callbacks(server.publish_final_state)
-            self.assert_runnable() # Check before launching browser
-            self.freeze_test()
+            self.assert_runnable() # Check before launching browser. self.execute also checks when freezing the test.
             
             if launch_browser and conf['station_server_port']:
                 webbrowser.open('http://localhost:%s' % conf['station_server_port'])

@@ -143,7 +143,7 @@ class PhaseGroup(mutablerecords.Record(
   def wrap(self, main_phases, name=None):
     """Returns PhaseGroup with additional main phases."""
     new_main = list(self.main)
-    if isinstance(main_phases, collections.Iterable):
+    if isinstance(main_phases, collections.abc.Iterable):
       new_main.extend(main_phases)
     else:
       new_main.append(main_phases)
@@ -261,7 +261,7 @@ def _flatten_functions(list_to_flatten, on_phase_group, on_iterable, on_else):
   for item in list_to_flatten:
     if isinstance(item, PhaseGroup):
       on_phase_group(item)
-    elif isinstance(item, collections.Iterable):
+    elif isinstance(item, collections.abc.Iterable):
       on_iterable(item)
     else:
       on_else(item)
@@ -286,7 +286,7 @@ def optionally_with_args(phase, **kwargs):
   """
   if isinstance(phase, PhaseGroup):
     return phase.with_args(**kwargs)
-  if isinstance(phase, collections.Iterable):
+  if isinstance(phase, collections.abc.Iterable):
     return [optionally_with_args(p, **kwargs) for p in phase]
 
   if not isinstance(phase, phase_descriptor.PhaseDescriptor):
@@ -317,7 +317,7 @@ def optionally_with_plugs(phase, **subplugs):
   """
   if isinstance(phase, PhaseGroup):
     return phase.with_plugs(**subplugs)
-  if isinstance(phase, collections.Iterable):
+  if isinstance(phase, collections.abc.Iterable):
     return [optionally_with_plugs(p, **subplugs) for p in phase]
 
   if not isinstance(phase, phase_descriptor.PhaseDescriptor):

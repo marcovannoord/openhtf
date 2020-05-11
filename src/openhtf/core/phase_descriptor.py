@@ -76,29 +76,31 @@ class PhaseOptions(mutablerecords.Record('PhaseOptions', [], {
   """Options used to override default test phase behaviors.
 
   Attributes:
-    name: Override for the name of the phase. Can be formatted in several
-        different ways as defined in util.format_string.
-    timeout_s: Timeout to use for the phase, in seconds.
-    run_if: Callback that decides whether to run the phase or not; if not run,
-        the phase will also not be logged.
-    requires_state: If True, pass the whole TestState into the first argument,
-        otherwise only the TestApi will be passed in.  This is useful if a
-        phase needs to wrap another phase for some reason, as
-        PhaseDescriptors can only be invoked with a TestState instance.
-    repeat_limit:  Maximum number of repeats.  None indicates a phase will
-        be repeated infinitely as long as PhaseResult.REPEAT is returned.
-    run_under_pdb: If True, run the phase under the Python Debugger (pdb).  When
-        setting this option, increase the phase timeout as well because the
-        timeout will still apply when under the debugger.
+      name: Override for the name of the phase. Can be formatted in several
+          different ways as defined in util.format_string.
+      timeout_s: Timeout to use for the phase, in seconds.
+      run_if: Callback that decides whether to run the phase or not; if not run,
+          the phase will also not be logged. Optionally, this callback may take
+          a single parameter: the test.state dictionnary. This allows dynamic
+          test selection based on variables in the user defined state.
+      requires_state: If True, pass the whole TestState into the first argument,
+          otherwise only the TestApi will be passed in.  This is useful if a
+          phase needs to wrap another phase for some reason, as
+          PhaseDescriptors can only be invoked with a TestState instance.
+      repeat_limit:  Maximum number of repeats.  None indicates a phase will
+          be repeated infinitely as long as PhaseResult.REPEAT is returned.
+      run_under_pdb: If True, run the phase under the Python Debugger (pdb).  When
+          setting this option, increase the phase timeout as well because the
+          timeout will still apply when under the debugger.
 
   Example Usages:
-    @PhaseOptions(timeout_s=1)
-    def PhaseFunc(test):
-      pass
+      @PhaseOptions(timeout_s=1)
+      def PhaseFunc(test):
+          pass
 
-    @PhaseOptions(name='Phase({port})')
-    def PhaseFunc(test, port, other_info):
-      pass
+      @PhaseOptions(name='Phase({port})')
+      def PhaseFunc(test, port, other_info):
+          pass
   """
 
   def format_strings(self, **kwargs):

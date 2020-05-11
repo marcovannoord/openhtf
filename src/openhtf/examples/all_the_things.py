@@ -29,7 +29,7 @@ from openhtf.output import callbacks
 from openhtf.output.callbacks import console_summary
 from openhtf.output.callbacks import json_factory
 
-from examples import example_plugs
+from openhtf.examples import example_plugs
 
 
 @htf.plug(example=example_plugs.ExamplePlug)

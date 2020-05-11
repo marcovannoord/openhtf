@@ -1,4 +1,5 @@
-spintop==0.7.0b3
+spintop==0.8.1a2 # TEMP. Change to >=0.8.1 once released.
+
 pandas
 pytest
 mock

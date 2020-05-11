@@ -29,6 +29,11 @@ FORM_LAYOUT = {
                 'default': "default",
                 'title': "Radio Choice"
             },
+            'checkbox': {
+                'type': "boolean", 
+                'default': False,
+                'title': "Checkbox"
+            },
             'dropdown': {
                 'type': "string", 
                 'default': "default",
@@ -63,6 +68,7 @@ This test simply showcases the custom forms by asking information to the tester 
                 { "value": "Two", "name": "Two" }
             ]
         },
+        "checkbox",
         {
             "key": "dropdown",
             "type": "select",

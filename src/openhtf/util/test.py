@@ -141,7 +141,7 @@ class InvalidTestError(Exception):
   """Raised when there's something invalid about a test."""
 
 
-class PhaseOrTestIterator(collections.Iterator):
+class PhaseOrTestIterator(collections.abc.Iterator):
 
   def __init__(self, iterator, mock_plugs):
     """Create an iterator for iterating over Tests or phases to run.
@@ -225,7 +225,7 @@ class PhaseOrTestIterator(collections.Iterator):
     phase_or_test = self.iterator.send(self.last_result)
     if isinstance(phase_or_test, openhtf.Test):
       self.last_result = self._handle_test(phase_or_test)
-    elif not isinstance(phase_or_test, collections.Callable):
+    elif not isinstance(phase_or_test, collections.abc.Callable):
       raise InvalidTestError(
           'methods decorated with patch_plugs must yield Test instances or '
           'individual test phases', phase_or_test)

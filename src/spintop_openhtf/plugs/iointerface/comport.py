@@ -25,6 +25,14 @@ class ComportInterface(IOInterface):
         self._reader = None
 
     def open(self, _serial=None):
+        """Opens the serial port using the :attr:`~ComportInterface.comport` and :attr:`~ComportInterface.baudrate`
+        object attributes.
+        
+        Arguments:
+            _serial:
+                Optionnal underlying :class:`serial.Serial` object to use. Used for mock testing.
+        
+        """
         self.close()
         if not _serial:
             _serial = serial.Serial(self.comport, self.baudrate, timeout=self.timeout)
@@ -33,6 +41,7 @@ class ComportInterface(IOInterface):
         self._reader.start()
 
     def close(self):
+        """Attempts to close the serial port if it exists."""
         if self._reader is not None and self._serial.is_open:
             self._reader.close()
             self._reader = None

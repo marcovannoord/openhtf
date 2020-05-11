@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Add basic plugs types: Comport, SSH, VISA. The dependencies associated with each plug is installed using an extra named `plugs.comport`, `plugs.ssh`, etc. 
-- SSH Plug `execute_command` now accepts a `return_resp_obj` parameter that can be set to True to receive an object that contains the following attributes: `exit_code`, `std_output`, `err_output`, `output` (err + std output)
+- SSH Plug `execute_command` returns an object that contains the following attributes: `exit_code`, `std_output`, `err_output`, `output` (err + std output)
+- SSH Plug raises a timeout exception (SSHTimeoutError) when the client timeout is reached.
+- Adds Sphinx-based documentation of the following modules:
+  - TestPlan
+  - OpenHTF Configuration & default values
+  - Plugs: Comport, SSH and VISA.
+- Added the spintop-openhtf examples in source at `spintop_openhtf.examples`
 
-### Deprecated
+### Changed
+- Spintop-OpenHTF with the GUI now needs to be installed with the [server] extra (pip install spintop-openhtf[server]==0.6.0). This is to avoid conflicts with the old version of tornado (4.0) that openhtf uses.
+- Changed imports of ABCs from `collections` to `collections.abc` to comply with Python 3.8 deprecation.
+- The examples of openhtf are now in the package `openhtf.examples` instead of the top-level package `examples`
+
+### Fixed
+- Issue #13. An object reference bug sometimes caused the frontend to not be notified when a new test started.
