@@ -25,6 +25,7 @@ class VISAInterface(UnboundPlug):
         self.open_timeout = open_timeout*1000 # ms
         self.timeout = timeout*1000 # ms
         self.instr = None
+        self.command_queue = []
 
     # Old opentest "Server" Side Interface
 
@@ -51,7 +52,7 @@ class VISAInterface(UnboundPlug):
         def check_connected(self, *args, **kwargs):
             if self.instr is None:
                 self.logger.info("Connection is no longer alive")
-                self.connect()
+                self.open()
             return function(self, *args, **kwargs)
 
         return check_connected
