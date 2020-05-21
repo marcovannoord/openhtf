@@ -73,7 +73,7 @@ setup(
         'PyYAML>=5.0',
         'pytz',
         'pyOpenSSL>=17.1.0,<18.0',
-        'spintop>=0.8.3'
+        'spintop>=0.8.2a6'
     ],
     extras_require={
         'server':[ # Allows the different GUI servers. Can still run without GUI.
