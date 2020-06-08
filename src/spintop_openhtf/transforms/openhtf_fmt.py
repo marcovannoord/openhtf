@@ -25,8 +25,8 @@ class OpenHTFTestRecordTransformer(Transformer):
         outcome_is = create_outcome_validator(test_record)
         builder.set_top_level_information(
             start_datetime=datetime.utcfromtimestamp(test_record['start_time_millis']/1000.0).replace(tzinfo=pytz.timezone('UTC')),
-            dut_id=test_record['dut_id'],
-            testbench_name=test_record['metadata']['test_name'],
+            dut=test_record['dut_id'],
+            testbench=test_record['metadata']['test_name'],
             duration=duration_of(test_record),
             outcome=dict(
                 is_pass=outcome_is(Outcome.PASS),
