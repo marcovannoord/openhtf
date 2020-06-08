@@ -1,4 +1,4 @@
-spintop==0.8.1a2 # TEMP. Change to >=0.8.1 once released.
+spintop>=0.8.3
 
 pandas
 pytest
