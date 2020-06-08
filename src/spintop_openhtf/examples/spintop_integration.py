@@ -17,9 +17,5 @@ def hello_world(test, prompts):
 
 if __name__ == '__main__':
     plan.enable_spintop()
-    conf.load(spintop_api_url='http://localhost:5079', spintop_org_id='tackv')
+    conf.load(spintop_org_id='tackv')
     plan.run()
-
-
-
-
