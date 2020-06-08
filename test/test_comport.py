@@ -113,5 +113,17 @@ def test_message_target(fake_serial, comport):
     assert response == 'hello\nline1line2line3'
     
 def test_message_target_timeout(fake_serial, comport):
+    start = time.time()
     with pytest.raises(IOTargetTimeout):
         response = comport.message_target('hello\n', 'line3', timeout=0.2)
+
+    delta = time.time() - start
+    assert delta < 0.5, f'Timeout is 0.2s, message_target took {delta}'
+
+def test_message_target_timeout_no_message(fake_serial, comport):
+    start = time.time()
+    with pytest.raises(IOTargetTimeout):
+        response = comport.message_target('', 'something-that-wont-happen', timeout=0.2)
+
+    delta = time.time() - start
+    assert delta < 0.5, f'Timeout is 0.2s, message_target took {delta}s'

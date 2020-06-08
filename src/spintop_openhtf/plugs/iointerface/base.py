@@ -116,7 +116,6 @@ class IOInterface(UnboundPlug, Protocol):
 
     def eof_received(self):
         pass
-
     
     def message_target(self, message, target, timeout=None, keeplines=0, _timeout_raises=True):
         """Sends the message string and waits for any string in target to be received. 
@@ -141,12 +140,13 @@ class IOInterface(UnboundPlug, Protocol):
         contentstring = StringIO()
 
         while not target_found and (timeout is None or time.time() - start_time < timeout):
-            line = self.next_line()
-            contentstring.write(line)
-            for targetstr in targets:
-                if targetstr in line:
-                    target_found = targetstr
-                    break
+            line = self.next_line(timeout=timeout) # wait no more than the timeout
+            if line:
+                contentstring.write(line)
+                for targetstr in targets:
+                    if targetstr in line:
+                        target_found = targetstr
+                        break
 
         if target_found is None:
             log_message = 'Message Target: timeout occured while waiting for %s' % str(targets)
