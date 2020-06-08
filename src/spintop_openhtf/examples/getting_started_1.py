@@ -6,7 +6,7 @@ from spintop_openhtf import TestPlan, conf
 from spintop_openhtf.util.markdown import markdown
 
 # This defines the name of the testbench.
-plan = TestPlan('examples.getting_started')
+plan = TestPlan('examples.getting_started', store_location='here')
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 

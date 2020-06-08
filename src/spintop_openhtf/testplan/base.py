@@ -274,13 +274,20 @@ class TestPlan(TestSequence):
         name: The name of the test plan. Used to identify the 'type' of the test.
         store_result: Whether results should automatically be stored as JSON in the
             spintop_openhtf site directory.
+        store_location: When store_result is True, where test results will be stored.
+            This can either be a callable function that receives the test record attributes
+            as kwargs arguments (e.g. fn(**test_record)) or a string that will be formatted with the
+            test record attributes (e.g. '{metadata[test_name]}/{outcome}').
+            This uses LocalStorageOutput, which instead of only writing the result as a JSON file
+            as OpenHTF does, writes that json file as result.json in the folder and writes all
+            test-attached files next to it.
     """
     DEFAULT_CONF = dict(
         station_server_port='4444', 
         capture_docstring=True
     )
 
-    def __init__(self, name:str='testplan', store_result:bool=True):
+    def __init__(self, name:str='testplan', store_result:bool=True, store_location:Union[str,Callable]=None):
         super(TestPlan, self).__init__(name=name)
         
         self._execute_test = None
@@ -295,7 +302,9 @@ class TestPlan(TestSequence):
         self._no_trigger = False
         
         if store_result:
-            self.add_callbacks(LocalStorageOutput(_local_storage_filename_pattern, indent=4))
+            if store_location is None:
+                store_location = _local_storage_filename_pattern
+            self.add_callbacks(LocalStorageOutput(store_location, indent=4))
             
         self.failure_exceptions = (user_input.SecondaryOptionOccured,)
 
