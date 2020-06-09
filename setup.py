@@ -11,6 +11,9 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(HERE, 'src', 'spintop_openhtf', 'VERSION')) as version_file:
     VERSION = version_file.read().strip()
 
+with open(os.path.join(HERE, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 # if not os.path.exists(os.path.join('openhtf', 'openhtf')):
 #     raise Exception('Please checkout the openhtf submodule before install.')
 
@@ -27,7 +30,9 @@ packages =  find_packages('src')
 setup(
     name='spintop-openhtf',
     version=VERSION,
-    description='A complete integration to spintop.io using OpenHTF. OpenHTF is currently vendored-in.',
+    description='An opinionated fork of OpenHTF by the team behind Spintop. OpenHTF is currently vendored-in.',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author='William Laroche',
     author_email='william.laroche@tackv.ca',
     maintainer='William Laroche',
