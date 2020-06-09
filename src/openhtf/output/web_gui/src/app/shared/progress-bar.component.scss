@@ -8,6 +8,9 @@
   overflow: hidden;
 
   &.is-complete {
+    .stripes {
+      animation: none;
+    }
     animation: htf-progress-bar-pulse 2s infinite;
   }
 }
