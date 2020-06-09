@@ -15,8 +15,6 @@ test:
 
 deploy:
   stage: deploy
-  only: 
-    - master
   script:
     - python setup.py sdist bdist_wheel
     - pip install twine
