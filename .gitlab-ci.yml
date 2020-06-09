@@ -1,8 +1,23 @@
 image: "python:3.7"
 
+stages:
+  - test
+  - deploy
+
 before_script:
   - python --version
   - pip install tox
 
 test:
-  - tox -r
+  stage: test
+  script:
+    - tox -r
+
+deploy:
+  stage: deploy
+  only: 
+    - master
+  script:
+    - python setup.py sdist bdist_wheel
+    - pip install twine
+    - TWINE_PASSWORD=$PYPI_TOKEN twine upload -u __token__ dist/*

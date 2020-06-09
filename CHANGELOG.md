@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2]
+
+### Added
+- Gitlab CI configuration.
+
+## [0.6.1]
+
+### Fixed
+- ComportInterface timeout would always at least be 10 seconds because of the underlying call to next_line without a timeout argument.
+- TestPlan now accepts a store_location argument to overwrite default site data dir location.
+
 ## [0.6]
 
 ### Added
