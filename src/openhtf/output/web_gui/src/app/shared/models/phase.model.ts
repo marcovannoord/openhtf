@@ -40,7 +40,7 @@ export class Phase {
     if (params.doc) docLines = params.doc.split("\n");
     else docLines = []
     params.doc = docLines.length > 0 ? docLines[0] : '';
-    params.docExtended = docLines.slice(1).join("\n");
+    params.docExtended = docLines.join("\n");
     Object.assign(this, params);
   }
 }

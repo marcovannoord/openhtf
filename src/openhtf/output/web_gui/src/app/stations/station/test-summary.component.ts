@@ -33,11 +33,9 @@ export class TestSummaryComponent implements OnChanges {
 
     let completedPhases = 0;
     for (const phase of this.test.phases) {
-      if (phase.status === PhaseStatus.running ||
-          phase.status === PhaseStatus.fail) {
-        break;
+      if (phase.status > PhaseStatus.running) {
+        completedPhases++;
       }
-      completedPhases++;
     }
     return completedPhases;
   }

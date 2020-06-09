@@ -70,15 +70,14 @@ setup(
         'future>=0.16.0',
         'gspread>=3.1.0',
         'google-api-python-client>=1.7.10',
+        'jsonschema>=3.0.2',
+        'markdown2>=2.3.8',
         'mutablerecords>=0.4.1,<2.0',
         'oauth2client>=4.1.3',
         'protobuf>=3.6.0,<4.0',
         'PyYAML>=5.0',
         'pytz',
-        'pyOpenSSL>=17.1.0,<18.0',
-        'SheetFu>=1.4.1',
-        'jsonschema>=3.0.2',
-        'markdown2>=2.3.8'
+        'pyOpenSSL>=17.1.0,<18.0'
     ],
     extras_require={
         'server':[ # Allows the different GUI servers. Can still run without GUI.

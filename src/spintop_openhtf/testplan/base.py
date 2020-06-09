@@ -22,7 +22,6 @@ from ..storage import SITE_DATA_DIR
 from ..callbacks.file_provider import TemporaryFileProvider
 from ..callbacks.local_storage import LocalStorageOutput
 
-
 try:
     import tornado, sockjs
     tornado_version = pkg_resources.get_distribution("tornado").version
@@ -481,16 +480,10 @@ class TestPlan(TestSequence):
         else:
             return create_default_trigger()
     
-    def create_plug(self):
-        class _SelfReferingPlug(BasePlug):
-            def __new__(cls):
-                return self
-        
-        return _SelfReferingPlug
-    
-    def spintop_plug(self, fn):
-        return htf.plugs.plug(spintop=self.create_plug())(fn)
-    
+    def enable_spintop(self, spintop=None):
+        from ..callbacks.spintop_cb import spintop_callback_factory
+        callback = spintop_callback_factory(spintop)
+        self.add_callbacks(callback)
 
 def _local_storage_filename_pattern(**test_record):
     folder = '{metadata[test_name]}'.format(**test_record)
