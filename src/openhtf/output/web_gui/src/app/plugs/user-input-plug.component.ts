@@ -144,7 +144,7 @@ export class UserInputPlugComponent extends BasePlug {
   }
 
   private focusSelf() {
-    const input = this.ref.nativeElement.querySelector('json-schema-form');
+    const input = this.ref.nativeElement.querySelector('input');
     if (input) {
       input.focus();
     }
