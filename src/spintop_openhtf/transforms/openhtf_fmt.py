@@ -46,5 +46,5 @@ class OpenHTFTestRecordTransformer(Transformer):
                         outcome=MeasureOutcome[value['outcome']] == MeasureOutcome.PASS,
                         value=value['measured_value']
                     )
-        
-        return builder.build()
+        record = builder.build()
+        return record
