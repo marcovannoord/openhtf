@@ -77,6 +77,7 @@ export interface RawPhase {
   measurements: {[name: string]: RawMeasurement};
   run_options: object;
   name: string;
+  outcome: string;
   doc?: string;
   result?: {};  // Not present on running phase state.
   start_time_millis: number;
@@ -204,14 +205,10 @@ function makePhase(phase: RawPhase, running: boolean) {
   let status: PhaseStatus;
   if (running) {
     status = PhaseStatus.running;
-  } else {
+  } else if (phase.outcome === 'PASS') {
     status = PhaseStatus.pass;
-    for (const measurement of measurements) {
-      if (measurement.status !== MeasurementStatus.pass) {
-        status = PhaseStatus.fail;
-        break;
-      }
-    }
+  } else {
+    status = PhaseStatus.fail;
   }
   return new Phase({
     attachments,
