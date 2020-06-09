@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.3]
+
+### Added
+- Issue #17: Form now auto-focuses the first field.
+
+### Fixed
+- Issue #10: Summary of phases was only partially shown.
+- Issue #14: Phases in the UI could not be FAIL unless measurements failed.
+- Issue #24: Fixed the progress bar having some weird behaviors.
+
 ## [0.6.2]
 
 ### Added
