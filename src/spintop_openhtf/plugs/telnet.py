@@ -1,5 +1,6 @@
 from .base import UnboundPlug
 
+import typing
 from functools import wraps
 from collections.abc import Sequence
 
@@ -24,7 +25,7 @@ def _telnet_client_connected(function):
 
 class TelnetInterface(UnboundPlug):
 
-    def __init__(self, addr, username=None, password=None, port=23):
+    def __init__(self, addr, username, password, port):
         super().__init__()
         self.tn = None
         self.addr = addr
@@ -62,7 +63,7 @@ class TelnetInterface(UnboundPlug):
             return True
 
     @_telnet_client_connected
-    def execute_command(self, command: str, timeout: float = 10, targets=None, assertexitcode:typing.Union[typing.List[int], int, None]=0):
+    def execute_command(self, command: str, timeout: float = 10, targets=None):
         """Send a :obj:`command` and wait for it to execute.
 
         Args:
@@ -70,44 +71,29 @@ class TelnetInterface(UnboundPlug):
             will executed the ls command.
             timeout (float, optional): The timeout in second to wait for the command to finish executing. Defaults to 10.
             targets ([type], optional): [description]. Defaults to None.
-            assertexitcode: Unless this is None, defines one or a list of exit codes that are expected. After the   command is executed, an :class:`SSHError` will be raised if the exit code is not as expected.
 
         Returns:
             str: output response from the Telnet client
 
         Raises:
-            SSHTimeoutError:
-                Raised when :obj:`timeout` is reached.
-            SSHError:
-                Raised when the exit code of the command is not in :obj:`assertexitcode` and :obj:`assertexitcode` is not None.
+            TelnetError:
+                Raised when reading the output goes wrong.
         """
 
         output = ""
-        exit_code = None
         if command != "":
             self.logger.info("(Timeout %.1fs)" % (timeout))
-            self.tn.write(command)
+            self.tn.write((command + "\n").encode('utf-8'))
             self.logger.debug("> {!r}".format(command))
 
             try:
-                output = self.read_some()
-            except:
-                raise TelnetError
+                output = self.tn.read_very_eager()
+                output = output.decode('utf-8')
+            except Exception as e:
+                raise TelnetError(e)
             finally:
-                self.tn.close()# Sends eof
+                self.tn.close()
         else:
             pass
-        
-        if assertexitcode is not None:
-            assert_exit_code(exit_code, expected=assertexitcode)
 
         return output
-
-
-def assert_exit_code(exit_code, expected):
-    if not isinstance(expected, Sequence):
-        expected = [expected]
-
-    if exit_code not in expected:
-        raise TelnetError(
-            'Exit code {} not in expected list {}'.format(exit_code, expected))
