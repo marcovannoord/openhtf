@@ -82,11 +82,9 @@ class TelnetInterface(UnboundPlug):
             from time import sleep
             self.logger.info("(Timeout %.1fs)" % (timeout))
             self.tn.write((command).encode() + b"\r\n")
-            sleep(0)
             self.logger.debug("> {!r}".format(command))
 
             try:
-                sleep(5)
                 output = self.tn.read_very_eager()
                 output = output.decode()
             except Exception as e:
