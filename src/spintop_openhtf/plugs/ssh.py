@@ -61,7 +61,7 @@ class SSHInterface(UnboundPlug):
             self.ssh.connect(self.addr, port=self.port, username=self.username, password=self.password, timeout=self.create_timeout)
             self.ssh.get_transport().set_keepalive(5) #Send keepalive packet every 5 seconds
         except Exception as e:
-            raise SSHError("%s %s" % (str(e), e.message))
+            raise SSHError("%s %s" % (e.__class__.__name__, str(e)))
 
     
     def is_connected(self):
