@@ -25,19 +25,16 @@ def _telnet_client_connected(function):
 
 class TelnetInterface(UnboundPlug):
 
-    def __init__(self, addr, username, password, port):
+    def __init__(self, addr, port=4343):
         super().__init__()
         self.tn = None
         self.addr = addr
         self.port = port
-        self.username = username
-        self.password = password
 
     def open(self, _client=None):
         # _client allows to pass in a mock for testing
         self.logger.info("(Initiating Telnet connection at %s)", self.addr)
-        self.logger.info("(addr={}:{}, user={!r}, password={!r})".format(
-            self.addr, self.port, self.username, self.password))
+        self.logger.info("(addr={}:{})".format(self.addr, self.port))
         try:
             if _client is None:
                 _client = telnetlib.Telnet(self.addr, self.port)
@@ -55,7 +52,7 @@ class TelnetInterface(UnboundPlug):
 
     def is_connected(self):
         try:
-            self.tn.write("\r\n")
+            self.tn.write("\r\n".encode())
             # If the Telnet object is not connected, an AttributeError is raised
         except AttributeError:
             return False
@@ -82,17 +79,18 @@ class TelnetInterface(UnboundPlug):
 
         output = ""
         if command != "":
+            from time import sleep
             self.logger.info("(Timeout %.1fs)" % (timeout))
-            self.tn.write((command + "\n").encode('utf-8'))
+            self.tn.write((command).encode() + b"\r\n")
+            sleep(0)
             self.logger.debug("> {!r}".format(command))
 
             try:
+                sleep(5)
                 output = self.tn.read_very_eager()
-                output = output.decode('utf-8')
+                output = output.decode()
             except Exception as e:
                 raise TelnetError(e)
-            finally:
-                self.tn.close()
         else:
             pass
 
