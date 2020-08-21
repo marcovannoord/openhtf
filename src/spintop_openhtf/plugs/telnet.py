@@ -60,17 +60,17 @@ class TelnetInterface(UnboundPlug):
             return True
 
     @_telnet_client_connected
-    def execute_command(self, command: str, timeout: float = 10, targets=None):
+    def execute_command(self, command: str, expected_output: str = "", until_timeout: float = 5):
         """Send a :obj:`command` and wait for it to execute.
 
         Args:
             command (str): The command to send. End of lines are automatically managed. For example execute_command('ls')
             will executed the ls command.
-            timeout (float, optional): The timeout in second to wait for the command to finish executing. Defaults to 10.
-            targets ([type], optional): [description]. Defaults to None.
+            expected_output (str, optional): If not none, the command executor will read until a given string, expected_output, is encountered or until until_timeout (s) have passed.
+            until_timeout (float, optional): The timeout in seconds to wait for the command to finish reading output. Defaults to 5.
 
         Returns:
-            str: output response from the Telnet client
+            output (str): output response from the Telnet client
 
         Raises:
             TelnetError:
@@ -79,14 +79,18 @@ class TelnetInterface(UnboundPlug):
 
         output = ""
         if command != "":
-            from time import sleep
-            self.logger.info("(Timeout %.1fs)" % (timeout))
+            self.logger.info("(Timeout %.1fs)" % (until_timeout))
             self.tn.write((command).encode() + b"\r\n")
             self.logger.debug("> {!r}".format(command))
 
             try:
-                output = self.tn.read_very_eager()
-                output = output.decode()
+                if expected_output == "":
+                    output = self.tn.read_until(b'\n\n', until_timeout)
+                    output = output.decode()
+                else:
+                    expected_output = expected_output.encode()
+                    output = self.tn.read_until(expected_output, until_timeout)
+                    output = output.decode()
             except Exception as e:
                 raise TelnetError(e)
         else:
