@@ -1,0 +1,243 @@
+{
+    "dut_id": "William",
+    "start_time_millis": 1599838075858,
+    "end_time_millis": 1599838077608,
+    "outcome": "PASS",
+    "outcome_details": [],
+    "metadata": {
+        "test_name": "examples.getting_started",
+        "config": {
+            "plug_teardown_timeout_s": 0,
+            "allow_unset_measurements": false,
+            "station_id": "PC-WILL",
+            "cancel_timeout_s": 2,
+            "stop_on_first_failure": false,
+            "capture_source": false,
+            "capture_docstring": true,
+            "teardown_timeout_s": 30,
+            "user_input_enable_console": false,
+            "frontend_throttle_s": 0.15,
+            "station_server_port": "4444"
+        }
+    },
+    "phases": [
+        {
+            "measurements": {},
+            "options": {
+                "name": "Hello-World",
+                "run_under_pdb": false
+            },
+            "start_time_millis": 1599836200668,
+            "end_time_millis": 1599838075858,
+            "attachments": {},
+            "result": {
+                "phase_result": "CONTINUE"
+            },
+            "outcome": "PASS",
+            "descriptor_id": 2657743298632,
+            "name": "Hello-World",
+            "codeinfo": {
+                "name": "hello_world",
+                "docstring": "Says Hello World !\n    \n# Hello World Test\n    \nWelcome to the **hello world** test.\n    ",
+                "sourcecode": ""
+            }
+        },
+        {
+            "measurements": {},
+            "options": {
+                "name": "Greet the tester",
+                "run_under_pdb": false
+            },
+            "start_time_millis": 1599838075859,
+            "end_time_millis": 1599838077607,
+            "attachments": {},
+            "result": {
+                "phase_result": "CONTINUE"
+            },
+            "outcome": "PASS",
+            "descriptor_id": 2657794414056,
+            "name": "Greet the tester",
+            "codeinfo": {
+                "name": "greet_tester",
+                "docstring": null,
+                "sourcecode": ""
+            }
+        }
+    ],
+    "log_records": [
+        {
+            "level": 10,
+            "logger_name": "openhtf.core.phase_executor",
+            "source": "phase_executor.py",
+            "lineno": 249,
+            "timestamp_millis": 1599836200668,
+            "message": "Executing phase Hello-World"
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.plugs.user_input",
+            "source": "user_input.py",
+            "lineno": 369,
+            "timestamp_millis": 1599836200669,
+            "message": "Displaying prompt (859a4fce3d5a4f39b458c9f8cb59e5a5): \"{'schema': {'title': 'First and Last Name', 'type': 'object', 'required': ['firstname', 'lastname'], 'properties': {'firstname': {'type': 'string', 'title': 'First Name'}, 'lastname': {'type': 'string', 'title': 'Last Name'}, 'radio_choice': {'type': 'string', 'default': 'default', 'title': 'Radio Choice'}, 'checkbox': {'type': 'boolean', 'default': False, 'title': 'Checkbox'}, 'dropdown': {'type': 'string', 'default': 'default', 'title': 'Dropdown'}}}, 'layout': [{'type': 'help', 'helpvalue': '<h1>Welcome to the Getting Started !</h1>\\n\\n<h2>Introduction</h2>\\n\\n<p>This test simply showcases the custom forms by asking information to the tester and then showing it to him.</p>\\n\\n<h2>Image showcase</h2>\\n\\n<p><img src=\"/tempfiles/9b5b3fff-58d9-4521-8a04-d88d5108d319\" width=\"200px\" /></p>\\n'}, 'firstname', 'lastname', {'key': 'radio_choice', 'type': 'radiobuttons', 'titleMap': [{'value': 'One', 'name': 'One'}, {'value': 'Two', 'name': 'Two'}]}, 'checkbox', {'key': 'dropdown', 'type': 'select', 'titleMap': [{'value': 'One', 'name': 'One'}, {'value': 'Two', 'name': 'Two'}]}]}\""
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.output.servers.pub_sub",
+            "source": "pub_sub.py",
+            "lineno": 58,
+            "timestamp_millis": 1599836201636,
+            "message": "New subscriber from ::1."
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.output.servers.pub_sub",
+            "source": "pub_sub.py",
+            "lineno": 58,
+            "timestamp_millis": 1599836202307,
+            "message": "New subscriber from ::1."
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.output.servers.pub_sub",
+            "source": "pub_sub.py",
+            "lineno": 64,
+            "timestamp_millis": 1599836204305,
+            "message": "A client unsubscribed."
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.plugs.user_input",
+            "source": "user_input.py",
+            "lineno": 432,
+            "timestamp_millis": 1599838075857,
+            "message": "Responding to prompt (859a4fce3d5a4f39b458c9f8cb59e5a5): \"{'content': {'firstname': 'William', 'lastname': 'Laroche', 'radio_choice': 'One', 'checkbox': False, 'dropdown': 'default'}, 'option': 'OKAY'}\""
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.util.threads",
+            "source": "threads.py",
+            "lineno": 169,
+            "timestamp_millis": 1599838075858,
+            "message": "Thread finished: <PhaseExecutorThread: (Hello-World)>"
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.core.phase_executor",
+            "source": "phase_executor.py",
+            "lineno": 277,
+            "timestamp_millis": 1599838075858,
+            "message": "Phase Hello-World finished with result PhaseResult.CONTINUE"
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.test_record.2628:48bcd94709b24b59:503bcff6c58c44c1:1599836200667",
+            "source": "test_executor.py",
+            "lineno": 327,
+            "timestamp_millis": 1599838075858,
+            "message": "Entering PhaseGroup examples.getting_started"
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.test_record.2628:48bcd94709b24b59:503bcff6c58c44c1:1599836200667",
+            "source": "test_executor.py",
+            "lineno": 280,
+            "timestamp_millis": 1599838075858,
+            "message": "Executing main phases for examples.getting_started"
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.test_record.2628:48bcd94709b24b59:503bcff6c58c44c1:1599836200667",
+            "source": "test_executor.py",
+            "lineno": 248,
+            "timestamp_millis": 1599838075859,
+            "message": "Handling phase Greet the tester"
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.core.phase_executor",
+            "source": "phase_executor.py",
+            "lineno": 249,
+            "timestamp_millis": 1599838075859,
+            "message": "Executing phase Greet the tester"
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.plugs.user_input",
+            "source": "user_input.py",
+            "lineno": 369,
+            "timestamp_millis": 1599838075859,
+            "message": "Displaying prompt (4affbfb833784622a093aae8b9831beb): \"\nHello William Laroche ! \n\nYou chose \"One\" from the radio buttons.\nYou chose \"default\" from the dropdown menu.\n\n\""
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.plugs.user_input",
+            "source": "user_input.py",
+            "lineno": 432,
+            "timestamp_millis": 1599838077606,
+            "message": "Responding to prompt (4affbfb833784622a093aae8b9831beb): \"{'content': {}, 'option': 'OKAY'}\""
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.util.threads",
+            "source": "threads.py",
+            "lineno": 169,
+            "timestamp_millis": 1599838077607,
+            "message": "Thread finished: <PhaseExecutorThread: (Greet the tester)>"
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.core.phase_executor",
+            "source": "phase_executor.py",
+            "lineno": 277,
+            "timestamp_millis": 1599838077607,
+            "message": "Phase Greet the tester finished with result PhaseResult.CONTINUE"
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.plugs",
+            "source": "__init__.py",
+            "lineno": 458,
+            "timestamp_millis": 1599838077607,
+            "message": "Tearing down all plugs."
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.util.threads",
+            "source": "threads.py",
+            "lineno": 169,
+            "timestamp_millis": 1599838077608,
+            "message": "Thread finished: <PlugTearDownThread: <class '__main__.GreetPlug'>>"
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.test_record.2628:48bcd94709b24b59:503bcff6c58c44c1:1599836200667",
+            "source": "test_state.py",
+            "lineno": 420,
+            "timestamp_millis": 1599838077608,
+            "message": "Finishing test execution normally with outcome PASS."
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.util.threads",
+            "source": "threads.py",
+            "lineno": 169,
+            "timestamp_millis": 1599838077608,
+            "message": "Thread finished: TestExecutorThread"
+        },
+        {
+            "level": 10,
+            "logger_name": "openhtf.core.test_descriptor",
+            "source": "test_descriptor.py",
+            "lineno": 350,
+            "timestamp_millis": 1599838077608,
+            "message": "Test completed for examples.getting_started, outputting now."
+        }
+    ],
+    "station_id": "PC-WILL",
+    "code_info": {
+        "name": "getting_started_1.py",
+        "docstring": null,
+        "sourcecode": ""
+    }
+}
