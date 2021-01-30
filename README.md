@@ -7,7 +7,9 @@ Spintop-OpenHTF is an opinionated fork of OpenHTF to bring a more standard appro
 
 ## Python Installation
 
-To install spintop-openhtf, you need Python. We officially support **Python 3.6+** for now. If you already have Python installed on your PC, you can skip this step. Officially supported OSes are:
+To install spintop-openhtf, you need Python. We officially support **Python 3.6 and 3.7** for now. At this time, it is unlikely we will support 3.8+ because of breaking changes in dependencies (tornado v4). 
+
+If you already have Python installed on your PC, you can skip this step. Officially supported OSes are:
 
 - **Windows 10**
     
