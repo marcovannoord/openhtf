@@ -67,9 +67,11 @@ def range_validator(value):
 criterion = htf.Measurement('test_criterion').with_validator(range_validator)
 ```
 
+However, doing so will remove the pretty-printing of the validator. For example, the built-in `in_range` validator will print out as "{min} < x < {max}".
+
 Using the with_validator function helps you create complex criteria that match your exact needs.
 
-For more details on the different types of criteria that can be implemented please refer the the Measurements reference
+For more details on the different types of criteria that can be implemented please refer to the Measurements reference
 
 ## Documentation
 
