@@ -1,13 +1,38 @@
-
 .. _forms-reference-label:
 
 ## Form Reference
 
-This page lists the different form types that can be used in a spintop-openhtf test bench.
+This section lists the different form types that can be used in a spintop-openhtf test bench. We'll start by requesting a first and last name, in order to illustrate the different input types that are available.
 
-### Example Data
+### Example Form & Data
 
-The previous form would then successfully validate the following JSON Data:
+We'll start with this basic form, requesting a first and last name from the user.
+
+```python
+FORM_LAYOUT = {
+    'schema':{
+        'title': "First and Last Name",
+        'type': "object",
+        'required': ["firstname", "lastname"],
+        'properties': {
+            'firstname': {
+                'type': "string", 
+                'title': "First Name"
+            },
+            'lastname': {
+                'type': "string", 
+                'title': "Last Name"
+            },
+        }
+    },
+    'layout':[
+        "firstname",
+        "lastname"
+    ]
+}
+```
+
+This form would then successfully validate the following JSON Data:
 
 ```json
 {
@@ -16,7 +41,7 @@ The previous form would then successfully validate the following JSON Data:
 }
 ```
 
-This is the dictionnary that is returned when you call `UserInput.prompt_form(...)`.
+This is the dictionary that is returned when you call `UserInput.prompt_form(FORM_LAYOUT)`.
 
 
 ### Layout
