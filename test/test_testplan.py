@@ -6,6 +6,7 @@ except ImportError:
     TORNADO_AVAILABLE = False
     
 from spintop_openhtf import TestPlan, PhaseResult
+from openhtf import Measurement
 
 A_TEST_PLAN_NAME = 'test-plan'
 A_TEST_NAME = 'Test1'
@@ -17,10 +18,17 @@ def test_plan():
 def test_simple_testcase(test_plan):
     
     @test_plan.testcase(A_TEST_NAME)
+    @test_plan.measures(Measurement('hello').equals('world'))
     def test_1(test): # pylint: disable=unused-variable
-        pass
+        test.measurements.hello = 'world'
     
     assert test_plan.phase_group.main and test_plan.phase_group.main[0].name == A_TEST_NAME
+
+    test_plan.no_trigger()
+    result = test_plan.run_console(once=True)
+
+    assert result, "Test should pass."
+    print(result)
 
 @pytest.mark.skipif(not TORNADO_AVAILABLE, reason="Requires the GUI extras [server]")
 def test_no_trigger_and_run_with_gui(test_plan):
