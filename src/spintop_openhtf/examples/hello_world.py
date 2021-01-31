@@ -23,7 +23,7 @@ FORM_LAYOUT = {
     'schema':{
         'title': "Todo",
         'type': "object",
-        'required': ["title"],
+        'required': [],
         'properties': {
             'title': {
                 'type': "string", 

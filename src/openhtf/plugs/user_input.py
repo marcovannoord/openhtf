@@ -106,8 +106,8 @@ class PromptResponse(object):
     self.content = str(response)
     self.option = None
     
-    if isinstance(response, collections.Mapping):
-      self.content = response.get('content', '')
+    if isinstance(response, collections.abc.Mapping):
+      self.content = response.get('content', {})
       self.option = response.get('option', None)
     # elif prompt_type != PromptType.FORM:
     #   self.option = response
@@ -122,6 +122,12 @@ class PromptResponse(object):
     
     self.option = OPTIONS[self.option]
     
+  def check_required_fields(self, required_fields):
+    if isinstance(self.content, collections.abc.Mapping):
+      return [f for f in required_fields if f not in self.content]
+    else:
+      return required_fields # Return True only if not required fields.
+
   def return_value(self):
     self.option.raise_if_error()
     return self.content
@@ -283,6 +289,21 @@ class UserInput(plugs.FrontendAwareBasePlug):
     global CONSOLE_PROMPT
     CONSOLE_PROMPT = value
 
+  @property
+  def required_fields(self):
+    if self._prompt:
+      message = getattr(self._prompt, 'message', None)
+      try:
+        return message['schema']['required']
+      except TypeError:
+        # Not a dict probably
+        return []
+      except KeyError:
+        # Not required fields possibly
+        return []
+    else:
+      return []
+
   def _asdict(self):
     """Return a dictionary representation of the current prompt."""
     with self._cond:
@@ -413,7 +434,7 @@ class UserInput(plugs.FrontendAwareBasePlug):
     if self._response is None:
       raise PromptUnansweredError
     
-    response = PromptResponse(self._response, self._prompt_type)
+    response = self._response
     return response.return_value()
 
   def respond(self, prompt_id, response):
@@ -433,13 +454,20 @@ class UserInput(plugs.FrontendAwareBasePlug):
     with self._cond:
       if not (self._prompt and self._prompt.id == prompt_id):
         return False
+
+      raw_response = response
+      response = PromptResponse(raw_response, self._prompt_type)
+
+      missing_required_fields = response.check_required_fields(self.required_fields)
+      if missing_required_fields:
+        _LOG.info(f'Prompt response missing required fields: {missing_required_fields!r}')
+        return False
       
       self._response = response
-      self.last_response = (prompt_id, response)
+      self.last_response = (prompt_id, raw_response)
       self.remove_prompt()
       self._cond.notifyAll()
     return True
-
 
 def prompt_for_test_start(
     message='Enter a DUT ID in order to start the test.', timeout_s=60*60*24,
