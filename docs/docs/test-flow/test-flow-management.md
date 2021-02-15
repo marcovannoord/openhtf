@@ -88,8 +88,8 @@ As an example, we create a test which generates a random number between 1-10 and
 from openhtf import PhaseResult
 import random
 
-@plan.testcase('Random')
-def random_test(test, repeat_limit = 5):
+@plan.testcase('Random', repeat_limit = 5)
+def random_test(test):
     """Generate a random number between 1 and 10. If number is 8, 9, or 10 it is a PASS. If not repeat"""
     val = random.randint(1, 10)
     print (val)

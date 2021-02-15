@@ -17,7 +17,7 @@ FORM_LAYOUT = {
     'schema':{
         'title': "Test configuration",
         'type': "object",
-        'required': ["operator, uutid, product"],
+        'required': ['operator', 'dutid', 'product'],
         'properties': {
             'operator': {
                 'type': "string", 
@@ -63,8 +63,8 @@ def sleep_test(test):
         return PhaseResult.FAIL_AND_CONTINUE
 
 
-@plan.testcase('Random')
-def random_test(test, repeat_limit = 5):
+@plan.testcase('Random', repeat_limit = 5)
+def random_test(test):
     """Generate a random number between 1 and 10. If number is 8, 9, or 10 it is a PASS. If not repeat"""
     val = random.randint(1, 10)
     print (val)

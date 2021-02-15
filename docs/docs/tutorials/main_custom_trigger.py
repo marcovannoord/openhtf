@@ -12,7 +12,7 @@ FORM_LAYOUT = {
     'schema':{
         'title': "Test configuration",
         'type': "object",
-        'required': ["operator, uutid, product"],
+        'required': ['operator', 'dutid', 'product'],
         'properties': {
             'operator': {
                 'type': "string", 

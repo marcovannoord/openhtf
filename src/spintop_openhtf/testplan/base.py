@@ -159,7 +159,7 @@ class TestSequence(object):
     
     def measures(self, *args, **kwargs):
         """Helper method: shortcut to :func:`openhtf.measures`"""
-        return htf.plugs.plug(*args, **kwargs)
+        return htf.measures(*args, **kwargs)
     
     def sub_sequence(self, name):
         """Create new empty TestSequence and append it to this sequence.
@@ -416,7 +416,7 @@ class TestPlan(TestSequence):
         """
         conf.load(user_input_enable_console=False, _override=False)
         with self._station_server_context(launch_browser):
-            self._run(once)
+            return self._run(once)
     
     def run_console(self, once=False):
         """Run this test without a frontend server and enables console input. 
@@ -426,17 +426,20 @@ class TestPlan(TestSequence):
         Args:
             once: When False, the test will run in a loop; i.e. when a test ends a new one will start immediately.
         """
-        self._run(once)
+        return self._run(once)
 
     def _run(self, once):
+        result = None
         while True:
             try:
-                self.execute()
+                result = self.execute()
             except KeyboardInterrupt:
                 break
             finally:
                 if once:
                     break
+        
+        return result
     
     def freeze_test(self):
         self._load_default_conf()

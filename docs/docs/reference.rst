@@ -53,6 +53,12 @@ SSH Interface
     :inherited-members:
     :members:
 
+Telnet Interface
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: spintop_openhtf.plugs.telnet.TelnetInterface
+    :inherited-members:
+    :members:
 
 .. VISA Interface
 .. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

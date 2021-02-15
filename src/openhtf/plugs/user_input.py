@@ -102,15 +102,17 @@ class PromptOption(object):
       raise self.error
   
 class PromptResponse(object):
-  def __init__(self, response, prompt_type):
-    self.content = str(response)
-    self.option = None
-    
-    if isinstance(response, collections.Mapping):
-      self.content = response.get('content', '')
+  def __init__(self, response, prompt_form):
+    self.prompt_form = prompt_form
+    if isinstance(response, collections.abc.Mapping):
+      self.content = response.get('content', {})
       self.option = response.get('option', None)
     # elif prompt_type != PromptType.FORM:
     #   self.option = response
+    else:
+      self.content = str(response)
+      self.option = None
+
     
     if not self.option:
       self.option = None
@@ -121,11 +123,54 @@ class PromptResponse(object):
       raise InvalidOption(self.option)
     
     self.option = OPTIONS[self.option]
+  
+  @property
+  def schema(self):
+    message = getattr(self.prompt_form, 'message', None)
+    try:
+      return message.get('schema', {})
+    except AttributeError:
+      return {}
+  
+  @property
+  def required_fields(self):
+    try:
+      return self.schema['required']
+    except TypeError:
+      # Not a dict probably
+      return []
+    except KeyError:
+      # Not required fields possibly
+      return []
+
+  def check_required_fields(self):
+    if isinstance(self.content, collections.abc.Mapping):
+      return [f for f in self.required_fields if f not in self.content]
+    else:
+      return self.required_fields # Return True only if not required fields.
+
+  def fill_in_defaults(self):
+    # First copy the returned values
+    try:
+      content_with_defaults = {key: value for key, value in self.content.items()}
+    except AttributeError:
+      # self.content has not attribute 'items'
+      # No need to fill in defaults.
+      return self.content
     
+    schema_properties = self.schema.get('properties', {})
+
+    for key, value in schema_properties.items():
+      # As defined in schema
+      if key not in content_with_defaults:
+        default_value = value.get('default', None)
+        content_with_defaults[key] = default_value
+
+    return content_with_defaults
+
   def return_value(self):
     self.option.raise_if_error()
-    return self.content
-      
+    return self.fill_in_defaults()
 
 OKAY = PromptOption('OKAY')
 
@@ -340,7 +385,7 @@ class UserInput(plugs.FrontendAwareBasePlug):
     try:
       return self.wait_for_prompt(timeout_s)
     except InvalidOption as e:
-      _LOG.info('Option %s is invalid. Please retry.' % e.option)
+      _LOG.warning('Option %s is invalid. Please retry.' % e.option)
       return self.prompt(message, prompt_type, cli_color, timeout_s)
 
   def start_prompt(self, message, prompt_type=PromptType.OKAY, cli_color=''):
@@ -413,7 +458,7 @@ class UserInput(plugs.FrontendAwareBasePlug):
     if self._response is None:
       raise PromptUnansweredError
     
-    response = PromptResponse(self._response, self._prompt_type)
+    response = self._response
     return response.return_value()
 
   def respond(self, prompt_id, response):
@@ -433,13 +478,20 @@ class UserInput(plugs.FrontendAwareBasePlug):
     with self._cond:
       if not (self._prompt and self._prompt.id == prompt_id):
         return False
+
+      raw_response = response
+      response = PromptResponse(raw_response, self._prompt)
+
+      missing_required_fields = response.check_required_fields()
+      if missing_required_fields:
+        _LOG.warning(f'Prompt response missing required fields: {missing_required_fields!r}')
+        return False
       
       self._response = response
-      self.last_response = (prompt_id, response)
+      self.last_response = (prompt_id, raw_response)
       self.remove_prompt()
       self._cond.notifyAll()
     return True
-
 
 def prompt_for_test_start(
     message='Enter a DUT ID in order to start the test.', timeout_s=60*60*24,
