@@ -13,6 +13,7 @@
 # limitations under the License.
 """Extensible HTTP server serving the OpenHTF Angular frontend."""
 
+import asyncio
 import os
 import threading
 import time
@@ -123,12 +124,13 @@ class WebGuiServer(threading.Thread):
     routes.extend(additional_routes)
 
     if sockets is None:
-      sockets, self.port = bind_port(port)
+      self.sockets, self.port = bind_port(port)
     else:
       if not port:
         raise ValueError('When sockets are passed to the server, port must be '
                          'specified and nonzero.')
       self.port = port
+      self.sockets = sockets
 
     # Configure the Tornado application.
     application = tornado.web.Application(
@@ -138,7 +140,7 @@ class WebGuiServer(threading.Thread):
         static_path=STATIC_FILES_ROOT,
     )
     self.server = tornado.httpserver.HTTPServer(application)
-    self.server.add_sockets(sockets)
+    # self.server.add_sockets(sockets)
 
   def __enter__(self):
     self.start()
@@ -152,6 +154,8 @@ class WebGuiServer(threading.Thread):
     return {}
 
   def run(self):
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    self.server.add_sockets(self.sockets)
     tornado.ioloop.IOLoop.instance().start()  # Blocking IO loop.
 
   def stop(self):
