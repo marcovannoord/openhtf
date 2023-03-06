@@ -5,6 +5,7 @@ process. However, the dashboard server (dashboard_server.py) can be used to
 aggregate info from multiple station servers with a single frontend.
 """
 
+import asyncio
 import contextlib
 import itertools
 import json
@@ -21,7 +22,7 @@ import collections
 import sockjs.tornado
 
 import openhtf
-from openhtf.output.callbacks import mfg_inspector
+# from openhtf.output.callbacks import mfg_inspector
 from openhtf.output.servers import pub_sub
 from openhtf.output.servers import web_gui_server
 from openhtf.util import conf
@@ -149,6 +150,7 @@ class StationWatcher(threading.Thread):
 
   def run(self):
     """Call self._poll_for_update() in a loop and handle errors."""
+    asyncio.set_event_loop(asyncio.new_event_loop())
     while True:
       try:
         self._poll_for_update()
