@@ -32,7 +32,7 @@ _LOG = logging.getLogger(__name__)
 # most logs from ending up in the test record by default.
 _LOG.setLevel(logging.WARNING)
 
-DEFAULT_ADDRESS = '239.1.1.1'
+DEFAULT_ADDRESS = '224.1.1.1'
 DEFAULT_PORT = 10000
 DEFAULT_TTL = 1
 LOCALHOST_ADDRESS = 0x7f000001  # 127.0.0.1
@@ -122,7 +122,7 @@ class MulticastListener(threading.Thread):
     else:
       self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,
                             1)  # Allow multiple listeners to bind.
-    self._sock.bind((self.address, self.port))
+    self._sock.bind(('0.0.0.0', self.port))
 
     while self._live:
       try:
