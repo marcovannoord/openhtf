@@ -26,8 +26,8 @@ try:
     import tornado, sockjs
     tornado_version = pkg_resources.get_distribution("tornado").version
     major, *rest = tornado_version.split('.')
-    if int(major) > 4:
-        raise ValueError('Tornado version must be <= 4.x.x')
+    # if int(major) > 6:
+        # raise ValueError('Tornado version must be <= 4.x.x')
 except (ImportError, ValueError):
     warnings.warn(
         'Tornado 4.x.x not available. GUI server will not work. '

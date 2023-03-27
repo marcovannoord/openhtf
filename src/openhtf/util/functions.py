@@ -31,13 +31,19 @@ def getargspec(func):
 
 def call_once(func):
   """Decorate a function to only allow it to be called once.
-
   Note that it doesn't make sense to only call a function once if it takes
   arguments (use @functools.lru_cache for that sort of thing), so this only
   works on callables that take no args.
+  Args:
+    func: function to decorate to only be called once.
+  Returns:
+    The decorated function.
   """
-  argspec = getargspec(func)
-  if argspec.args or argspec.varargs or argspec.keywords:
+  argspec = inspect.getfullargspec(func)
+  argspec_args = argspec.args
+  argspec_varargs = argspec.varargs
+  argspec_keywords = argspec.varkw
+  if argspec_args or argspec_varargs or argspec_keywords:
     raise ValueError('Can only decorate functions with no args', func, argspec)
 
   @functools.wraps(func)

@@ -373,7 +373,7 @@ class PhasesHandler(BaseTestHandler):
     
     phase_tree = test.descriptor.phase_group.build_tree()
     def tree_to_dict(tree):
-      if isinstance(tree, collections.Iterable):
+      if isinstance(tree, collections.abc.Iterable):
         return [tree_to_dict(item) for item in tree]
       else:
         return transform_phase_to_dict(tree)
@@ -580,7 +580,7 @@ class StationServer(web_gui_server.WebGuiServer):
     #     Currently, if we call logs.ARG_PARSER.parse_known_args() multiple
     #     times, we multiply the number of v's that we get.
     tornado_logger = logging.getLogger('tornado')
-    tornado_logger.propagate = False
+    tornado_logger.propagate = True
     tornado_logger.setLevel(logging.INFO)
     
     if not tornado_logger.handlers:

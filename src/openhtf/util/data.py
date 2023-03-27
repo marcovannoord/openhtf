@@ -207,7 +207,7 @@ def total_size(obj):
     if isinstance(current_obj, dict):
       size += sum(map(sizeof, itertools.chain.from_iterable(
           six.iteritems(current_obj))))
-    elif (isinstance(current_obj, collections.Iterable) and
+    elif (isinstance(current_obj, collections.abc.Iterable) and
           not isinstance(current_obj, six.string_types)):
       size += sum(sizeof(item) for item in current_obj)
     elif isinstance(current_obj, records.RecordClass):

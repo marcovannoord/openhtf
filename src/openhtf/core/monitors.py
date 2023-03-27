@@ -74,14 +74,17 @@ class _MonitorThread(threads.KillableThread):
     self.extra_kwargs = extra_kwargs
 
   def get_value(self):
-    arg_info = functions.getargspec(self.monitor_desc.func)
-    if arg_info.keywords:
+    argspec = inspect.getfullargspec(self.monitor_desc.func)
+    argspec_args = argspec.args
+    argspec_keywords = argspec.varkw
+    if argspec_keywords:
       # Monitor phase takes **kwargs, so just pass everything in.
       kwargs = self.extra_kwargs
     else:
       # Only pass in args that the monitor phase takes.
-      kwargs = {arg: val for arg, val in self.extra_kwargs
-                if arg in arg_info.args}
+      kwargs = {
+          arg: val for arg, val in self.extra_kwargs if arg in argspec_args
+      }
     return self.monitor_desc.with_args(**kwargs)(self.test_state)
 
   def _thread_proc(self):
