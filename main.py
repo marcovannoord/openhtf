@@ -7,6 +7,31 @@ from spintop_openhtf import TestPlan
 # This defines the name of the testbench.
 plan = TestPlan('hello')
 
+
+FORM_LAYOUT = {
+    'schema':{
+        'title': "Impedance",
+        'type': "object",
+        'required': ["impedance"],
+        'properties': {
+            'impedance': {
+                'type': "string",
+                'title': "Measure Impedance on test point X\nEnter value in Ohms"
+            },
+        }
+    },
+    'layout':[
+        "impedance"
+    ]
+}
+
+@plan.testcase('userinput-Test')
+@plan.plug(prompts=UserInput)
+def userinput(test, prompts):
+    """Displays the custom from defined above"""
+    prompts.prompt_form(FORM_LAYOUT)
+
+
 @plan.testcase('Hello-Test')
 @plan.plug(prompts=UserInput)
 def hello_world(test, prompts):
