@@ -81,7 +81,7 @@ setup(
     ],
     extras_require={
         'server':[ # Allows the different GUI servers. Can still run without GUI.
-            'tornado>=4.3,<5.0',
+            'tornado>=6.0',
             'sockjs-tornado>=1.0.3,<2.0',
         ],
         'plugs.comport':[
