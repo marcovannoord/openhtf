@@ -12,7 +12,7 @@ python -m openhtf.output.servers.dashboard_server --no-launch-web-gui
 
 Then start the Webpack watcher by running the following from the
 `openhtf/output/web_gui` directory in another tab:
-
+Note: You need to use Node v10.24.1 to do this, since the latest (currently 14) doesn't seem to work
 ```
 npm install
 npm run start
