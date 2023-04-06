@@ -25,7 +25,7 @@ import 'rxjs/add/operator/mergeMap';
 
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { ConfigService } from '../../core/config.service';
 import { FlashMessageService } from '../../core/flash-message.service';
@@ -200,6 +200,7 @@ export class StationService extends Subscription {
               })
               .catch(error => {
                 const tooltip = messageFromErrorResponse(error);
+                console.error(error);
                 this.flashMessage.error(
                     'HTTP request for phase descriptors failed.', tooltip);
                 return Promise.reject(error);

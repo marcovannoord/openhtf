@@ -20,8 +20,8 @@
 
 import { Component } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { Observable } from 'rxjs/Observable';
-import { Subject } from 'rxjs/Subject';
+import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { ConfigService } from '../../core/config.service';
 import { StationStatus } from '../../shared/models/station.model';

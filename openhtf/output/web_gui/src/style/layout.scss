@@ -40,6 +40,10 @@
   display: flex;
 }
 
+.htf-layout-nav-brand {
+  height: $nav-height;
+}
+
 .htf-layout-container {
   @include htf-layout-centered;
 }

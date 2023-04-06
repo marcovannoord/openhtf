@@ -19,7 +19,7 @@
  */
 
 import { fakeAsync, tick } from '@angular/core/testing';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { PhaseStatus } from '../../shared/models/phase.model';
 import { Station, StationStatus } from '../../shared/models/station.model';

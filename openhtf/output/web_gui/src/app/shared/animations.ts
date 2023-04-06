@@ -29,7 +29,6 @@ export const washIn = [
         animate(1000),
       ]),
 ];
-
 export function washAndExpandIn(maxHeight) {
   return [
     state('in', style({

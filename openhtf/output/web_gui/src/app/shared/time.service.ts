@@ -23,7 +23,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/publish';
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 const UPDATE_INTERVAL_MS = 100;
 
